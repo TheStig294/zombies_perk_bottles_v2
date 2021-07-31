@@ -51,7 +51,7 @@ local function PHDRemoveFallDamage(target, dmginfo)
     local equip_id = TTT2 and "item_ttt_phd" or EQUIP_PHD
     if not target:HasEquipmentItem(equip_id) then return end
 
-    if dmginfo:IsFallDamage() then
+    if dmginfo:IsFallDamage() and target:GetNWBool("StigDisablePHD") == false then
         local explode = ents.Create("env_explosion")
         explode:SetPos(target:GetPos())
         explode:SetOwner(target)
@@ -85,12 +85,12 @@ hook.Add("DoPlayerDeath", "TTTPHDReset", function(pl)
 end)
 
 function SWEP:OnRemove()
-    if CLIENT and IsValid(self.Owner) and self.Owner == LocalPlayer() and self.Owner:Alive() then
+    if CLIENT and IsValid(self:GetOwner()) and self:GetOwner() == LocalPlayer() and self:GetOwner():Alive() then
         RunConsoleCommand("lastinv")
     end
 
     if CLIENT then
-        if self.Owner == LocalPlayer() and LocalPlayer().GetViewModel then
+        if self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
             local vm = LocalPlayer():GetViewModel()
             vm:SetMaterial(oldmat)
             oldmat = nil
@@ -131,40 +131,40 @@ function SWEP:Initialize()
     timer.Simple(0.1, function()
         local equip_id = TTT2 and "item_ttt_phd" or EQUIP_PHD
 
-        if not self.Owner:HasEquipmentItem(equip_id) then
+        if not self:GetOwner():HasEquipmentItem(equip_id) then
             if CLIENT then
                 hook.Run("TTTBoughtItem", equip_id, equip_id)
             else
-                self.Owner:GiveEquipmentItem(equip_id)
+                self:GetOwner():GiveEquipmentItem(equip_id)
             end
         end
 
         if SERVER then
-            self.Owner:SelectWeapon(self:GetClass())
+            self:GetOwner():SelectWeapon(self:GetClass())
             net.Start("DrinkingthePHD")
-            net.Send(self.Owner)
+            net.Send(self:GetOwner())
 
             timer.Simple(0.5, function()
-                if IsValid(self) and IsValid(self.Owner) and self.Owner:IsTerror() then
+                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
                     self:EmitSound("perks/open.wav")
-                    self.Owner:ChatPrint("PERK BOTTLE EFFECT:\nInstead of taking fall damage, you explode everything around you!")
-                    self.Owner:ViewPunch(Angle(-1, 1, 0))
+                    self:GetOwner():ViewPunch(Angle(-1, 1, 0))
+                    self:GetOwner():ChatPrint("PERK BOTTLE EFFECT:\nInstead of taking fall damage, you explode everything around you!")
 
                     timer.Simple(0.8, function()
-                        if IsValid(self) and IsValid(self.Owner) and self.Owner:IsTerror() then
+                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
                             self:EmitSound("perks/drink.wav")
-                            self.Owner:ViewPunch(Angle(-2.5, 0, 0))
+                            self:GetOwner():ViewPunch(Angle(-2.5, 0, 0))
 
                             timer.Simple(1, function()
-                                if IsValid(self) and IsValid(self.Owner) and self.Owner:IsTerror() then
+                                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
                                     self:EmitSound("perks/smash.wav")
                                     net.Start("PHDBlurHUD")
-                                    net.Send(self.Owner)
+                                    net.Send(self:GetOwner())
 
-                                    timer.Create("TTTPHD" .. self.Owner:EntIndex(), 0.8, 1, function()
-                                        if IsValid(self) and IsValid(self.Owner) and self.Owner:IsTerror() then
+                                    timer.Create("TTTPHD" .. self:GetOwner():EntIndex(), 0.8, 1, function()
+                                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
                                             self:EmitSound("perks/burp.wav")
-                                            self.Owner:SetNWBool("PHDActive", true)
+                                            self:GetOwner():SetNWBool("PHDActive", true)
                                             self:Remove()
                                         end
                                     end)
@@ -177,7 +177,7 @@ function SWEP:Initialize()
         end
 
         if CLIENT then
-            if self.Owner == LocalPlayer() and LocalPlayer().GetViewModel then
+            if self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
                 local vm = LocalPlayer():GetViewModel()
                 local mat = "models/perk_bottle/c_perk_bottle_phd" --perk_materials[self:GetPerk()]
                 oldmat = vm:GetMaterial() or ""
