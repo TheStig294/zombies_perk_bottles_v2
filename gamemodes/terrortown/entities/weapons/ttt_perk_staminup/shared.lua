@@ -153,6 +153,7 @@ function SWEP:Initialize()
                                             self:EmitSound("perks/burp.wav")
                                             self.Owner:SetRunSpeed(400)
                                             self.Owner:SetNWBool("StaminUpActive", true)
+                                            self.Owner:SetNWBool("StaminUpFix", true)
                                             self:Remove()
                                         end
                                     end)
@@ -160,6 +161,13 @@ function SWEP:Initialize()
                             end)
                         end
                     end)
+                end
+            end)
+
+            hook.Add("PlayerSpawn", "StaminupResetFix", function(ply, transition)
+                if ply:GetNWBool("StaminUpFix") then
+                    ply:SetRunSpeed(ply:GetWalkSpeed())
+                    ply:SetNWBool("StaminUpFix", false)
                 end
             end)
         end
