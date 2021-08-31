@@ -170,6 +170,13 @@ function SWEP:Initialize()
                     ply:SetNWBool("StaminUpFix", false)
                 end
             end)
+
+            hook.Add("PostPlayerDeath", "StaminupResetFix", function(ply)
+                if ply:GetNWBool("StaminUpFix") then
+                    ply:SetRunSpeed(ply:GetWalkSpeed())
+                    ply:SetNWBool("StaminUpFix", false)
+                end
+            end)
         end
 
         if CLIENT then
