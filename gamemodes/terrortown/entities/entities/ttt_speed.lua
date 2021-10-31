@@ -55,9 +55,6 @@ if CLIENT then
             surface.DrawTexturedRect(20, yCoordinate, 64, 64)
         end
     end)
-
-    LANG.AddToLanguage("english", "item_speed_name", "Speed Cola")
-    LANG.AddToLanguage("english", "item_speed_desc", "Doubles your reload speed of ordinary guns.")
 end
 
 EQUIP_SPEEDCOLA = (GenerateNewEquipmentID and GenerateNewEquipmentID()) or 512
