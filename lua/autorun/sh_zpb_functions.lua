@@ -40,16 +40,6 @@ hook.Add("PlayerSpawn", "ZPBResetMaterial", function(ply)
     end
 end)
 
-hook.Add("TTTOrderedEquipment", "PerksStripCig", function(ply, equipment, is_item)
-    if ply:HasWeapon("weapon_cigarro") and is_item and (equipment == EQUIP_DOUBLETAP or equipment == EQUIP_JUGGERNOG or equipment == EQUIP_PHD or equipment == EQUIP_SPEEDCOLA or equipment == EQUIP_STAMINUP) then
-        ply:StripWeapon("weapon_cigarro")
-
-        timer.Simple(4, function()
-            ply:Give("weapon_cigarro")
-        end)
-    end
-end)
-
 net.Receive("ZPBResetMaterials", function()
     if CLIENT and IsValid(LocalPlayer()) and IsValid(LocalPlayer():GetViewModel()) then
         local vm = LocalPlayer():GetViewModel()
@@ -63,22 +53,22 @@ net.Receive("ZPBResetMaterials", function()
     end
 end)
 
-CreateConVar("ttt_doubletap_detective", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Whether a detective can buy Doubletap", 0, 1)
+CreateConVar("ttt_doubletap_detective", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a detective can buy Doubletap", 0, 1)
 
-CreateConVar("ttt_doubletap_traitor", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Whether a traitor can buy Doubletap", 0, 1)
+CreateConVar("ttt_doubletap_traitor", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a traitor can buy Doubletap", 0, 1)
 
-CreateConVar("ttt_juggernog_detective", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Whether a detective can buy Juggernog", 0, 1)
+CreateConVar("ttt_juggernog_detective", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a detective can buy Juggernog", 0, 1)
 
-CreateConVar("ttt_juggernog_traitor", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Whether a traitor can buy Juggernog", 0, 1)
+CreateConVar("ttt_juggernog_traitor", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a traitor can buy Juggernog", 0, 1)
 
-CreateConVar("ttt_phd_detective", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Whether a detective can buy PHD Flopper", 0, 1)
+CreateConVar("ttt_phd_detective", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a detective can buy PHD Flopper", 0, 1)
 
-CreateConVar("ttt_phd_traitor", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Whether a traitor can buy PHD Flopper", 0, 1)
+CreateConVar("ttt_phd_traitor", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a traitor can buy PHD Flopper", 0, 1)
 
-CreateConVar("ttt_speedcola_detective", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Whether a detective can buy Speed Cola", 0, 1)
+CreateConVar("ttt_speedcola_detective", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a detective can buy Speed Cola", 0, 1)
 
-CreateConVar("ttt_speedcola_traitor", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Whether a traitor can buy Speed Cola", 0, 1)
+CreateConVar("ttt_speedcola_traitor", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a traitor can buy Speed Cola", 0, 1)
 
-CreateConVar("ttt_staminup_detective", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Whether a detective can buy Staminup", 0, 1)
+CreateConVar("ttt_staminup_detective", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a detective can buy Staminup", 0, 1)
 
-CreateConVar("ttt_staminup_traitor", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Whether a traitor can buy Staminup", 0, 1)
+CreateConVar("ttt_staminup_traitor", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a traitor can buy Staminup", 0, 1)
