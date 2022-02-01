@@ -60,7 +60,7 @@ function ApplySpeed(wep)
             wep.OldReload = wep.Reload
 
             wep.Reload = function(self, ...)
-                if (self:Clip1() == self.Primary.ClipSize or self.Owner:GetAmmoCount(self.Primary.Ammo) <= 0) or self.Reloading then return end
+                if (self:Clip1() == self.Primary.ClipSize or self:GetOwner():GetAmmoCount(self.Primary.Ammo) <= 0) or self.Reloading then return end
                 if not IsFirstTimePredicted() then return end
                 timer.Remove("SpeedReload" .. self:EntIndex())
                 local ct = CurTime()
@@ -70,10 +70,10 @@ function ApplySpeed(wep)
                 diff = sequencetime / 2 + ct
                 self.reloadtimer = diff
                 self:SetPlaybackRate(2)
-                self.Owner:GetViewModel():SetPlaybackRate(2)
+                self:GetOwner():GetViewModel():SetPlaybackRate(2)
                 self:SetNextPrimaryFire(diff)
                 self:SetNextSecondaryFire(diff)
-                self.Owner:SetFOV(0, 0.2)
+                self:GetOwner():SetFOV(0, 0.2)
 
                 if IsValid(self:SetIronsights()) then
                     self:SetIronsights(false)
@@ -83,12 +83,12 @@ function ApplySpeed(wep)
             wep.OldThink = wep.Think
 
             wep.Think = function(self, ...)
-                if IsValid(self) and self.Reloading and IsFirstTimePredicted() and self.reloadtimer <= CurTime() and IsValid(self.Owner) and self.Owner:IsTerror() and self.Owner:GetActiveWeapon() == self then
+                if IsValid(self) and self.Reloading and IsFirstTimePredicted() and self.reloadtimer <= CurTime() and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() and IsValid(self:GetOwner():GetActiveWeapon()) and self:GetOwner():GetActiveWeapon() == self then
                     local maxclip = self.Primary.ClipSize
                     local curclip = self:Clip1()
-                    local amounttoreplace = math.min(maxclip - curclip, self.Owner:GetAmmoCount(self.Primary.Ammo))
+                    local amounttoreplace = math.min(maxclip - curclip, self:GetOwner():GetAmmoCount(self.Primary.Ammo))
                     self:SetClip1(curclip + amounttoreplace)
-                    self.Owner:RemoveAmmo(amounttoreplace, self.Primary.Ammo)
+                    self:GetOwner():RemoveAmmo(amounttoreplace, self.Primary.Ammo)
                     self.Reloading = false
                 end
             end
@@ -118,31 +118,30 @@ function ApplySpeed(wep)
                     self:SetIronsights(false)
                     if not IsFirstTimePredicted() then return false end
                     self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-                    local ply = self.Owner
+                    local ply = self:GetOwner()
                     if not ply or ply:GetAmmoCount(self.Primary.Ammo) <= 0 then return false end
                     local wep = self
                     if wep:Clip1() >= self.Primary.ClipSize then return false end
                     wep:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
                     self:SetPlaybackRate(2)
-                    self.Owner:GetViewModel():SetPlaybackRate(2)
+                    self:GetOwner():GetViewModel():SetPlaybackRate(2)
                     self.reloadtimer = CurTime() + wep:SequenceDuration() / 2
-                    --wep:SetNWBool("reloading", true)
                     self:SetReloading(true)
 
                     return true
                 end
 
                 wep.PerformReload = function(self, ...)
-                    local ply = self.Owner
+                    local ply = self:GetOwner()
                     -- prevent normal shooting in between reloads
                     self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
                     if not ply or ply:GetAmmoCount(self.Primary.Ammo) <= 0 then return end
                     if self:Clip1() >= self.Primary.ClipSize then return end
-                    self.Owner:RemoveAmmo(1, self.Primary.Ammo, false)
+                    self:GetOwner():RemoveAmmo(1, self.Primary.Ammo, false)
                     self:SetClip1(self:Clip1() + 1)
                     self:SendWeaponAnim(ACT_VM_RELOAD)
                     self:SetPlaybackRate(2)
-                    self.Owner:GetViewModel():SetPlaybackRate(2)
+                    self:GetOwner():GetViewModel():SetPlaybackRate(2)
                     self:SetReloadTimer(CurTime() + self:SequenceDuration() / 2)
                 end
 
@@ -150,7 +149,7 @@ function ApplySpeed(wep)
                     self:SetReloading(false)
                     self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
                     self:SetPlaybackRate(2)
-                    self.Owner:GetViewModel():SetPlaybackRate(2)
+                    self:GetOwner():GetViewModel():SetPlaybackRate(2)
                     self:SetReloadTimer(CurTime() + self:SequenceDuration() / 2)
                 end
 
@@ -174,31 +173,30 @@ function ApplySpeed(wep)
                     self:SetIronsights(false)
                     if not IsFirstTimePredicted() then return false end
                     self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
-                    local ply = self.Owner
+                    local ply = self:GetOwner()
                     if not ply or ply:GetAmmoCount(self.Primary.Ammo) <= 0 then return false end
                     local wep = self
                     if wep:Clip1() >= self.Primary.ClipSize then return false end
                     wep:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
                     self:SetPlaybackRate(2)
-                    self.Owner:GetViewModel():SetPlaybackRate(2)
+                    self:GetOwner():GetViewModel():SetPlaybackRate(2)
                     self.reloadtimer = CurTime() + wep:SequenceDuration() / 2
-                    --wep:SetNWBool("reloading", true)
                     self.dt.reloading = true
 
                     return true
                 end
 
                 wep.PerformReload = function(self, ...)
-                    local ply = self.Owner
+                    local ply = self:GetOwner()
                     -- prevent normal shooting in between reloads
                     self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
                     if not ply or ply:GetAmmoCount(self.Primary.Ammo) <= 0 then return end
                     if self:Clip1() >= self.Primary.ClipSize then return end
-                    self.Owner:RemoveAmmo(1, self.Primary.Ammo, false)
+                    self:GetOwner():RemoveAmmo(1, self.Primary.Ammo, false)
                     self:SetClip1(self:Clip1() + 1)
                     self:SendWeaponAnim(ACT_VM_RELOAD)
                     self:SetPlaybackRate(2)
-                    self.Owner:GetViewModel():SetPlaybackRate(2)
+                    self:GetOwner():GetViewModel():SetPlaybackRate(2)
                     self.reloadtimer = CurTime() + self:SequenceDuration() / 2
                 end
 
@@ -206,7 +204,7 @@ function ApplySpeed(wep)
                     self.dt.reloading = false
                     self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
                     self:SetPlaybackRate(2)
-                    self.Owner:GetViewModel():SetPlaybackRate(2)
+                    self:GetOwner():GetViewModel():SetPlaybackRate(2)
                     self.reloadtimer = CurTime() + self:SequenceDuration() / 2
                 end
 
@@ -279,16 +277,14 @@ hook.Add("DoPlayerDeath", "TTTSpeedReset", function(ply)
 end)
 
 function SWEP:OnRemove()
-    if CLIENT and IsValid(self.Owner) and self.Owner == LocalPlayer() and self.Owner:Alive() then
+    if CLIENT and IsValid(self:GetOwner()) and self:GetOwner() == LocalPlayer() and self:GetOwner():Alive() then
         RunConsoleCommand("lastinv")
     end
 
-    if CLIENT then
-        if self.Owner == LocalPlayer() and LocalPlayer().GetViewModel then
-            local vm = LocalPlayer():GetViewModel()
-            vm:SetMaterial(oldmat)
-            oldmat = nil
-        end
+    if CLIENT and self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
+        local vm = LocalPlayer():GetViewModel()
+        vm:SetMaterial(oldmat)
+        oldmat = nil
     end
 end
 
@@ -325,40 +321,40 @@ function SWEP:Initialize()
     timer.Simple(0.1, function()
         local equip_id = TTT2 and "item_ttt_speed" or EQUIP_SPEEDCOLA
 
-        if not self.Owner:HasEquipmentItem(equip_id) then
+        if not self:GetOwner():HasEquipmentItem(equip_id) then
             if CLIENT then
                 hook.Run("TTTBoughtItem", equip_id, equip_id)
             else
-                self.Owner:GiveEquipmentItem(equip_id)
+                self:GetOwner():GiveEquipmentItem(equip_id)
             end
         end
 
         if SERVER then
-            self.Owner:SelectWeapon(self:GetClass())
+            self:GetOwner():SelectWeapon(self:GetClass())
             net.Start("DrinkingtheSpeed")
-            net.Send(self.Owner)
+            net.Send(self:GetOwner())
 
             timer.Simple(0.5, function()
-                if IsValid(self) and IsValid(self.Owner) and self.Owner:IsTerror() then
+                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
                     self:EmitSound("perks/open.wav")
-                    self.Owner:ChatPrint("PERK BOTTLE EFFECT:\nYour reload speed is increased!")
-                    self.Owner:ViewPunch(Angle(-1, 1, 0))
+                    self:GetOwner():ChatPrint("PERK BOTTLE EFFECT:\nYour reload speed is increased!")
+                    self:GetOwner():ViewPunch(Angle(-1, 1, 0))
 
                     timer.Simple(0.8, function()
-                        if IsValid(self) and IsValid(self.Owner) and self.Owner:IsTerror() then
+                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
                             self:EmitSound("perks/drink.wav")
-                            self.Owner:ViewPunch(Angle(-2.5, 0, 0))
+                            self:GetOwner():ViewPunch(Angle(-2.5, 0, 0))
 
                             timer.Simple(1, function()
-                                if IsValid(self) and IsValid(self.Owner) and self.Owner:IsTerror() then
+                                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
                                     self:EmitSound("perks/smash.wav")
                                     net.Start("SpeedBlurHUD")
-                                    net.Send(self.Owner)
+                                    net.Send(self:GetOwner())
 
-                                    timer.Create("TTTSpeed" .. self.Owner:EntIndex(), 0.8, 1, function()
-                                        if IsValid(self) and IsValid(self.Owner) and self.Owner:IsTerror() then
+                                    timer.Create("TTTSpeed" .. self:GetOwner():EntIndex(), 0.8, 1, function()
+                                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
                                             self:EmitSound("perks/burp.wav")
-                                            self.Owner:SetNWBool("SpeedActive", true)
+                                            self:GetOwner():SetNWBool("SpeedActive", true)
                                             self:Remove()
                                         end
                                     end)
@@ -370,13 +366,11 @@ function SWEP:Initialize()
             end)
         end
 
-        if CLIENT then
-            if self.Owner == LocalPlayer() and LocalPlayer().GetViewModel then
-                local vm = LocalPlayer():GetViewModel()
-                local mat = "models/perk_bottle/c_perk_bottle_speed" --perk_materials[self:GetPerk()]
-                oldmat = vm:GetMaterial() or ""
-                vm:SetMaterial(mat)
-            end
+        if CLIENT and self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
+            local vm = LocalPlayer():GetViewModel()
+            local mat = "models/perk_bottle/c_perk_bottle_speed"
+            oldmat = vm:GetMaterial() or ""
+            vm:SetMaterial(mat)
         end
     end)
 
