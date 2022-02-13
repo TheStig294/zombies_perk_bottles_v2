@@ -130,6 +130,7 @@ end
 function SWEP:Initialize()
     timer.Simple(0.1, function()
         local equip_id = TTT2 and "item_ttt_phd" or EQUIP_PHD
+        if (not IsValid(self)) or (not IsValid(self:GetOwner())) then return end
 
         if not self:GetOwner():HasEquipmentItem(equip_id) then
             if CLIENT then

@@ -61,12 +61,12 @@ hook.Add("DoPlayerDeath", "TTTStaminupReset", function(ply)
 end)
 
 function SWEP:OnRemove()
-    if CLIENT and IsValid(self.Owner) and self.Owner == LocalPlayer() and self.Owner:Alive() then
+    if CLIENT and IsValid(self:GetOwner()) and self:GetOwner() == LocalPlayer() and self:GetOwner():Alive() then
         RunConsoleCommand("lastinv")
     end
 
     if CLIENT then
-        if self.Owner == LocalPlayer() and LocalPlayer().GetViewModel then
+        if self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
             local vm = LocalPlayer():GetViewModel()
             vm:SetMaterial(oldmat)
             oldmat = nil
@@ -117,43 +117,44 @@ end)
 function SWEP:Initialize()
     timer.Simple(0.1, function()
         local equip_id = TTT2 and "item_ttt_staminup" or EQUIP_STAMINUP
+        if (not IsValid(self)) or (not IsValid(self:GetOwner())) then return end
 
-        if not self.Owner:HasEquipmentItem(equip_id) then
+        if not self:GetOwner():HasEquipmentItem(equip_id) then
             if CLIENT then
                 hook.Run("TTTBoughtItem", equip_id, equip_id)
             else
-                self.Owner:GiveEquipmentItem(equip_id)
+                self:GetOwner():GiveEquipmentItem(equip_id)
             end
         end
 
         if SERVER then
-            self.Owner:SelectWeapon(self:GetClass())
+            self:GetOwner():SelectWeapon(self:GetClass())
             net.Start("DrinkingtheStaminup")
-            net.Send(self.Owner)
+            net.Send(self:GetOwner())
 
             timer.Simple(0.5, function()
-                if IsValid(self) and IsValid(self.Owner) and self.Owner:IsTerror() then
+                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
                     self:EmitSound("perks/open.wav")
-                    self.Owner:ChatPrint("PERK BOTTLE EFFECT:\nYou can run really fast!")
-                    self.Owner:ViewPunch(Angle(-1, 1, 0))
+                    self:GetOwner():ChatPrint("PERK BOTTLE EFFECT:\nYou can run really fast!")
+                    self:GetOwner():ViewPunch(Angle(-1, 1, 0))
 
                     timer.Simple(0.8, function()
-                        if IsValid(self) and IsValid(self.Owner) and self.Owner:IsTerror() then
+                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
                             self:EmitSound("perks/drink.wav")
-                            self.Owner:ViewPunch(Angle(-2.5, 0, 0))
+                            self:GetOwner():ViewPunch(Angle(-2.5, 0, 0))
 
                             timer.Simple(1, function()
-                                if IsValid(self) and IsValid(self.Owner) and self.Owner:IsTerror() then
+                                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
                                     self:EmitSound("perks/smash.wav")
                                     net.Start("StaminBlurHUD")
-                                    net.Send(self.Owner)
+                                    net.Send(self:GetOwner())
 
-                                    timer.Create("TTTStaminUp" .. self.Owner:EntIndex(), 0.8, 1, function()
-                                        if IsValid(self) and IsValid(self.Owner) and self.Owner:IsTerror() then
+                                    timer.Create("TTTStaminUp" .. self:GetOwner():EntIndex(), 0.8, 1, function()
+                                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
                                             self:EmitSound("perks/burp.wav")
-                                            self.Owner:SetRunSpeed(400)
-                                            self.Owner:SetNWBool("StaminUpActive", true)
-                                            self.Owner:SetNWBool("StaminUpFix", true)
+                                            self:GetOwner():SetRunSpeed(400)
+                                            self:GetOwner():SetNWBool("StaminUpActive", true)
+                                            self:GetOwner():SetNWBool("StaminUpFix", true)
                                             self:Remove()
                                         end
                                     end)
@@ -180,7 +181,7 @@ function SWEP:Initialize()
         end
 
         if CLIENT then
-            if self.Owner == LocalPlayer() and LocalPlayer().GetViewModel then
+            if self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
                 local vm = LocalPlayer():GetViewModel()
                 local mat = "models/perk_bottle/c_perk_bottle_stamin" --perk_materials[self:GetPerk()]
                 oldmat = vm:GetMaterial() or ""
