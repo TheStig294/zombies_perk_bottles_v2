@@ -9,7 +9,7 @@ end
 SWEP.Author = "Gamefreak"
 SWEP.Instructions = "Reach for Juggernog tonight!"
 SWEP.Base = "weapon_tttbase"
-SWEP.Kind = EQUIP_PERKBOTTLE
+SWEP.Kind = 115
 SWEP.AmmoEnt = ""
 SWEP.InLoadoutFor = nil
 SWEP.LimitedStock = true

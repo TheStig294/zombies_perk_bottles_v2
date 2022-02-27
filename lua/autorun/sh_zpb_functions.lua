@@ -10,7 +10,6 @@ end
 local Perks = {"PHD", "StaminUp", "Juggernog", "Speed", "DoubleTap"}
 
 local plymeta = FindMetaTable("Player")
-EQUIP_PERKBOTTLE = (GenerateNewEquipmentID and GenerateNewEquipmentID()) or 256
 
 function plymeta:IsDrinking()
     for _, perk in pairs(Perks) do
