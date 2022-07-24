@@ -75,7 +75,7 @@ function ApplySpeed(wep)
                 self:SetNextSecondaryFire(diff)
                 self:GetOwner():SetFOV(0, 0.2)
 
-                if IsValid(self:SetIronsights()) then
+                if IsValid(self) and self.SetIronsights then
                     self:SetIronsights(false)
                 end
             end
