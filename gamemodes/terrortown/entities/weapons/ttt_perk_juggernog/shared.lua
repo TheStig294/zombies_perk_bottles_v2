@@ -111,44 +111,48 @@ end
 function SWEP:Initialize()
     timer.Simple(0.1, function()
         local equip_id = TTT2 and "item_ttt_juggernog" or EQUIP_JUGGERNOG
-        if (not IsValid(self)) or (not IsValid(self:GetOwner())) then return end
+        local owner = self:GetOwner()
+        if not IsValid(owner) then return end
 
-        if not self:GetOwner():HasEquipmentItem(equip_id) then
+        if not owner:HasEquipmentItem(equip_id) then
             if CLIENT then
                 hook.Run("TTTBoughtItem", equip_id, equip_id)
             else
-                self:GetOwner():GiveEquipmentItem(equip_id)
+                owner:GiveEquipmentItem(equip_id)
             end
         end
 
         if SERVER then
-            self:GetOwner():SelectWeapon(self:GetClass())
+            owner:SelectWeapon(self:GetClass())
+            owner:ChatPrint("JUGGERNOG:\nFull heal and max health increase!")
             net.Start("DrinkingtheJuggernog")
-            net.Send(self:GetOwner())
+            net.Send(owner)
 
             timer.Simple(0.5, function()
-                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
-                    self:EmitSound("perks/open.wav")
-                    self:GetOwner():ChatPrint("PERK BOTTLE EFFECT:\nFull heal and max health increase!")
-                    self:GetOwner():ViewPunch(Angle(-1, 1, 0))
+                if IsValid(owner) and owner:IsTerror() then
+                    owner:EmitSound("perks/open.wav")
+                    owner:ViewPunch(Angle(-1, 1, 0))
 
                     timer.Simple(0.8, function()
-                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
-                            self:EmitSound("perks/drink.wav")
-                            self:GetOwner():ViewPunch(Angle(-2.5, 0, 0))
+                        if IsValid(owner) and owner:IsTerror() then
+                            owner:EmitSound("perks/drink.wav")
+                            owner:ViewPunch(Angle(-2.5, 0, 0))
 
                             timer.Simple(1, function()
-                                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
-                                    self:EmitSound("perks/smash.wav")
+                                if IsValid(owner) and owner:IsTerror() then
+                                    owner:EmitSound("perks/smash.wav")
                                     net.Start("JuggerBlurHUD")
-                                    net.Send(self:GetOwner())
+                                    net.Send(owner)
 
-                                    timer.Create("TTTJuggernog" .. self:GetOwner():EntIndex(), 0.8, 1, function()
-                                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
-                                            self:EmitSound("perks/burp.wav")
-                                            self:GetOwner():SetHealth(self:GetOwner():GetMaxHealth() * 1.5)
-                                            self:GetOwner():SetNWBool("JuggernogActive", true)
-                                            self:Remove()
+                                    timer.Create("TTTJuggernog" .. owner:EntIndex(), 0.8, 1, function()
+                                        if IsValid(owner) and owner:IsTerror() then
+                                            owner:EmitSound("perks/burp.wav")
+                                            owner:SetHealth(owner:GetMaxHealth() * 1.5)
+                                            owner:SetNWBool("JuggernogActive", true)
+
+                                            if IsValid(self) then
+                                                self:Remove()
+                                            end
                                         end
                                     end)
                                 end
@@ -159,13 +163,11 @@ function SWEP:Initialize()
             end)
         end
 
-        if CLIENT then
-            if self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
-                local vm = LocalPlayer():GetViewModel()
-                local mat = "models/perk_bottle/c_perk_bottle_jugg"
-                oldmat = vm:GetMaterial() or ""
-                vm:SetMaterial(mat)
-            end
+        if CLIENT and owner == LocalPlayer() and LocalPlayer().GetViewModel then
+            local vm = LocalPlayer():GetViewModel()
+            local mat = "models/perk_bottle/c_perk_bottle_jugg"
+            oldmat = vm:GetMaterial() or ""
+            vm:SetMaterial(mat)
         end
     end)
 
