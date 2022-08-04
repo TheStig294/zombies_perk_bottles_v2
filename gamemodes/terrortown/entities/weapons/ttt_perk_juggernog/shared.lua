@@ -111,6 +111,7 @@ end
 function SWEP:Initialize()
     timer.Simple(0.1, function()
         local equip_id = TTT2 and "item_ttt_juggernog" or EQUIP_JUGGERNOG
+        if not IsValid(self) then return end
         local owner = self:GetOwner()
         if not IsValid(owner) then return end
 
@@ -130,17 +131,17 @@ function SWEP:Initialize()
 
             timer.Simple(0.5, function()
                 if IsValid(owner) and owner:IsTerror() then
-                    owner:EmitSound("perks/open.wav")
+                    self:EmitSound("perks/open.wav")
                     owner:ViewPunch(Angle(-1, 1, 0))
 
                     timer.Simple(0.8, function()
                         if IsValid(owner) and owner:IsTerror() then
-                            owner:EmitSound("perks/drink.wav")
+                            self:EmitSound("perks/drink.wav")
                             owner:ViewPunch(Angle(-2.5, 0, 0))
 
                             timer.Simple(1, function()
                                 if IsValid(owner) and owner:IsTerror() then
-                                    owner:EmitSound("perks/smash.wav")
+                                    self:EmitSound("perks/smash.wav")
                                     net.Start("JuggerBlurHUD")
                                     net.Send(owner)
 
@@ -149,10 +150,7 @@ function SWEP:Initialize()
                                             owner:EmitSound("perks/burp.wav")
                                             owner:SetHealth(owner:GetMaxHealth() * 1.5)
                                             owner:SetNWBool("JuggernogActive", true)
-
-                                            if IsValid(self) then
-                                                self:Remove()
-                                            end
+                                            self:Remove()
                                         end
                                     end)
                                 end

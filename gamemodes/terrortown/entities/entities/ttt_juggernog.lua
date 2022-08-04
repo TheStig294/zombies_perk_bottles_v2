@@ -93,13 +93,10 @@ if SERVER then
             ply:Give("ttt_perk_juggernog")
 
             timer.Simple(0.2, function()
-                if not IsValid(ply) or not ply:Alive() or ply:IsSpec() then return end
-
-                if not ply:HasWeapon("ttt_perk_juggernog") then
-                    ply:EmitSound("perks/burp.wav")
-                    ply:SetHealth(ply:GetMaxHealth() * 1.5)
-                    ply:SetNWBool("JuggernogActive", true)
-                end
+                if not IsValid(ply) or not ply:Alive() or ply:IsSpec() or ply:HasWeapon("ttt_perk_juggernog") then return end
+                ply:EmitSound("perks/burp.wav")
+                ply:SetHealth(ply:GetMaxHealth() * 1.5)
+                ply:SetNWBool("JuggernogActive", true)
             end)
         end
     end)
