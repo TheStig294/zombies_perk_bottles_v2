@@ -91,6 +91,15 @@ if SERVER then
     hook.Add("TTTOrderedEquipment", "TTTStaminup", function(ply, id, is_item)
         if id == EQUIP_STAMINUP then
             ply:Give("ttt_perk_staminup")
+
+            timer.Simple(0.2, function()
+                if not IsValid(ply) or not ply:Alive() or ply:IsSpec() or ply:HasWeapon("ttt_perk_staminup") then return end
+                ply:EmitSound("perks/burp.wav")
+                ply:SetRunSpeed(400)
+                ply:SetNWBool("StaminUpActive", true)
+                ply:SetNWBool("StaminUpFix", true)
+                ply:Remove()
+            end)
         end
     end)
 end

@@ -1,7 +1,7 @@
 if SERVER then
     AddCSLuaFile("shared.lua")
-    util.AddNetworkString("DrinkingtheSpeed")
-    util.AddNetworkString("SpeedBlurHUD")
+    util.AddNetworkString("DrinkingtheSpeedCola")
+    util.AddNetworkString("SpeedColaBlurHUD")
     resource.AddFile("sound/perks/buy_speed.wav")
     resource.AddFile("models/weapons/c_perk_bottle.mdl")
     resource.AddFile("materials/models/perk_bottle/c_perk_bottle_speed.vmt")
@@ -255,7 +255,7 @@ end
 hook.Add("PlayerSwitchWeapon", "TTTSpeedEnable", function(ply, old, new)
     local equip_id = TTT2 and "item_ttt_speed" or EQUIP_SPEEDCOLA
 
-    if ply:GetNWBool("SpeedActive", false) and ply:HasEquipmentItem(equip_id) then
+    if ply:GetNWBool("SpeedColaActive", false) and ply:HasEquipmentItem(equip_id) then
         ApplySpeed(new)
         RemoveSpeed(old)
     end
@@ -263,7 +263,7 @@ end)
 
 hook.Add("TTTPrepareRound", "TTTSpeedReset", function()
     for k, v in pairs(player.GetAll()) do
-        v:SetNWBool("SpeedActive", false)
+        v:SetNWBool("SpeedColaActive", false)
         timer.Remove("TTTSpeed" .. v:EntIndex())
     end
 end)
@@ -272,7 +272,7 @@ hook.Add("DoPlayerDeath", "TTTSpeedReset", function(ply)
     local equip_id = TTT2 and "item_ttt_speed" or EQUIP_SPEEDCOLA
 
     if ply:HasEquipmentItem(equip_id) then
-        ply:SetNWBool("SpeedActive", false)
+        ply:SetNWBool("SpeedColaActive", false)
     end
 end)
 
@@ -300,62 +300,64 @@ function SWEP:ShouldDropOnDie()
 end
 
 if CLIENT then
-    net.Receive("DrinkingtheSpeed", function()
+    net.Receive("DrinkingtheSpeedCola", function()
         surface.PlaySound("perks/buy_speed.wav")
     end)
 
-    net.Receive("SpeedBlurHUD", function()
-        hook.Add("HUDPaint", "SpeedBlurHUD", function()
+    net.Receive("SpeedColaBlurHUD", function()
+        hook.Add("HUDPaint", "SpeedColaBlurHUD", function()
             if IsValid(LocalPlayer()) and IsValid(LocalPlayer():GetActiveWeapon()) and LocalPlayer():GetActiveWeapon():GetClass() == "ttt_perk_speed" then
                 DrawMotionBlur(0.4, 0.8, 0.01)
             end
         end)
 
         timer.Simple(0.7, function()
-            hook.Remove("HUDPaint", "SpeedBlurHUD")
+            hook.Remove("HUDPaint", "SpeedColaBlurHUD")
         end)
     end)
 end
 
 function SWEP:Initialize()
     timer.Simple(0.1, function()
-        local equip_id = TTT2 and "item_ttt_speed" or EQUIP_SPEEDCOLA
-        if (not IsValid(self)) or (not IsValid(self:GetOwner())) then return end
+        local equip_id = TTT2 and "item_ttt_speedcola" or EQUIP_SPEEDCOLA
+        if not IsValid(self) then return end
+        local owner = self:GetOwner()
+        if not IsValid(owner) then return end
 
-        if not self:GetOwner():HasEquipmentItem(equip_id) then
+        if not owner:HasEquipmentItem(equip_id) then
             if CLIENT then
                 hook.Run("TTTBoughtItem", equip_id, equip_id)
             else
-                self:GetOwner():GiveEquipmentItem(equip_id)
+                owner:GiveEquipmentItem(equip_id)
             end
         end
 
         if SERVER then
-            self:GetOwner():SelectWeapon(self:GetClass())
-            net.Start("DrinkingtheSpeed")
-            net.Send(self:GetOwner())
+            owner:SelectWeapon(self:GetClass())
+            owner:ChatPrint("SPEEDCOLA:\nReload speed increased!")
+            net.Start("DrinkingtheSpeedCola")
+            net.Send(owner)
 
             timer.Simple(0.5, function()
-                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
+                if IsValid(owner) and owner:IsTerror() then
                     self:EmitSound("perks/open.wav")
-                    self:GetOwner():ChatPrint("PERK BOTTLE EFFECT:\nYour reload speed is increased!")
-                    self:GetOwner():ViewPunch(Angle(-1, 1, 0))
+                    owner:ViewPunch(Angle(-1, 1, 0))
 
                     timer.Simple(0.8, function()
-                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
+                        if IsValid(owner) and owner:IsTerror() then
                             self:EmitSound("perks/drink.wav")
-                            self:GetOwner():ViewPunch(Angle(-2.5, 0, 0))
+                            owner:ViewPunch(Angle(-2.5, 0, 0))
 
                             timer.Simple(1, function()
-                                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
+                                if IsValid(owner) and owner:IsTerror() then
                                     self:EmitSound("perks/smash.wav")
-                                    net.Start("SpeedBlurHUD")
-                                    net.Send(self:GetOwner())
+                                    net.Start("SpeedColaBlurHUD")
+                                    net.Send(owner)
 
-                                    timer.Create("TTTSpeed" .. self:GetOwner():EntIndex(), 0.8, 1, function()
-                                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
+                                    timer.Create("TTTSpeedCola" .. owner:EntIndex(), 0.8, 1, function()
+                                        if IsValid(owner) and owner:IsTerror() then
                                             self:EmitSound("perks/burp.wav")
-                                            self:GetOwner():SetNWBool("SpeedActive", true)
+                                            owner:SetNWBool("SpeedColaActive", true)
                                             self:Remove()
                                         end
                                     end)
@@ -367,7 +369,7 @@ function SWEP:Initialize()
             end)
         end
 
-        if CLIENT and self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
+        if CLIENT and owner == LocalPlayer() and LocalPlayer().GetViewModel then
             local vm = LocalPlayer():GetViewModel()
             local mat = "models/perk_bottle/c_perk_bottle_speed"
             oldmat = vm:GetMaterial() or ""

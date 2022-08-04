@@ -91,6 +91,12 @@ if SERVER then
     hook.Add("TTTOrderedEquipment", "TTTPHD", function(ply, id, is_item)
         if id == EQUIP_PHD then
             ply:Give("ttt_perk_phd")
+
+            timer.Simple(0.2, function()
+                if not IsValid(ply) or not ply:Alive() or ply:IsSpec() or ply:HasWeapon("ttt_perk_phd") then return end
+                ply:EmitSound("perks/burp.wav")
+                ply:SetNWBool("PHDActive", true)
+            end)
         end
     end)
 end

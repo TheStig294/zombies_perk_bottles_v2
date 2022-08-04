@@ -1,7 +1,7 @@
 --if TTT2 then return end
 if SERVER then
     AddCSLuaFile()
-    resource.AddFile("materials/vgui/ttt/ic_speed.vmt")
+    resource.AddFile("materials/vgui/ttt/ic_speedcola.vmt")
     resource.AddFile("materials/vgui/ttt/perks/hud_speed.png")
 end
 
@@ -40,7 +40,7 @@ if CLIENT then
     local yCoordinate = defaultY
 
     -- best performance, but the has about 0.5 seconds delay to the HasEquipmentItem() function
-    hook.Add("TTTBoughtItem", "TTTSpeed", function()
+    hook.Add("TTTBoughtItem", "TTTSpeedCola", function()
         if (LocalPlayer():HasEquipmentItem(EQUIP_SPEEDCOLA)) then
             yCoordinate = getYCoordinate(EQUIP_SPEEDCOLA)
         end
@@ -48,8 +48,8 @@ if CLIENT then
 
     local material = Material("vgui/ttt/perks/hud_speed.png")
 
-    hook.Add("HUDPaint", "TTTSpeed", function()
-        if LocalPlayer():GetNWBool("SpeedActive", false) and LocalPlayer():HasEquipmentItem(EQUIP_SPEEDCOLA) then
+    hook.Add("HUDPaint", "TTTSpeedCola", function()
+        if LocalPlayer():GetNWBool("SpeedColaActive", false) and LocalPlayer():HasEquipmentItem(EQUIP_SPEEDCOLA) then
             surface.SetMaterial(material)
             surface.SetDrawColor(255, 255, 255, 255)
             surface.DrawTexturedRect(20, yCoordinate, 64, 64)
@@ -64,7 +64,7 @@ local SpeedCola = {
     id = EQUIP_SPEEDCOLA,
     loadout = false,
     type = "item_passive",
-    material = "vgui/ttt/ic_speed",
+    material = "vgui/ttt/ic_speedcola",
     name = "Speed Cola",
     desc = "Doubles your reload speed of ordinary guns.",
     hud = true
@@ -84,32 +84,38 @@ if GetConVar("ttt_speedcola_detective"):GetBool() and GetConVar("ttt_speedcola_t
 end
 
 if SERVER then
-    hook.Add("TTTCanOrderEquipment", "TTTSpeed", function(ply, id, is_item)
+    hook.Add("TTTCanOrderEquipment", "TTTSpeedCola", function(ply, id, is_item)
         if tonumber(id) == EQUIP_SPEEDCOLA and ply:IsDrinking() then return false end
     end)
 
-    hook.Add("TTTOrderedEquipment", "TTTSpeed", function(ply, id, is_item)
+    hook.Add("TTTOrderedEquipment", "TTTSpeedCola", function(ply, id, is_item)
         if id == EQUIP_SPEEDCOLA then
-            ply:Give("ttt_perk_speed")
+            ply:Give("ttt_perk_speedcola")
+
+            timer.Simple(0.2, function()
+                if not IsValid(ply) or not ply:Alive() or ply:IsSpec() or ply:HasWeapon("ttt_perk_speedcola") then return end
+                ply:EmitSound("perks/burp.wav")
+                ply:SetNWBool("SpeedColaActive", true)
+            end)
         end
     end)
 end
 
 if CLIENT then
-    hook.Add("TTTBodySearchEquipment", "SpeedCorpseIcon", function(search, eq)
-        search.eq_speed = util.BitSet(eq, EQUIP_SPEEDCOLA)
+    hook.Add("TTTBodySearchEquipment", "SpeedColaCorpseIcon", function(search, eq)
+        search.eq_speedcola = util.BitSet(eq, EQUIP_SPEEDCOLA)
     end)
 
-    hook.Add("TTTBodySearchPopulate", "SpeedCorpseIcon", function(search, raw)
-        if (not raw.eq_speed) then return end
+    hook.Add("TTTBodySearchPopulate", "SpeedColaCorpseIcon", function(search, raw)
+        if (not raw.eq_speedcola) then return end
         local highest = 0
 
         for _, v in pairs(search) do
             highest = math.max(highest, v.p)
         end
 
-        search.eq_speed = {
-            img = "vgui/ttt/ic_speed",
+        search.eq_speedcola = {
+            img = "vgui/ttt/ic_speedcola",
             text = "They drunk a Speed Cola.",
             p = highest + 1
         }

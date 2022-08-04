@@ -1,7 +1,7 @@
 if SERVER then
     AddCSLuaFile("shared.lua")
-    util.AddNetworkString("DrinkingtheStaminup")
-    util.AddNetworkString("StaminBlurHUD")
+    util.AddNetworkString("DrinkingtheStaminUp")
+    util.AddNetworkString("StaminUpBlurHUD")
     resource.AddFile("sound/perks/buy_stam.wav")
     resource.AddFile("materials/models/perk_bottle/c_perk_bottle_stamin.vmt")
 end
@@ -92,19 +92,19 @@ function SWEP:OnDrop()
 end
 
 if CLIENT then
-    net.Receive("DrinkingtheStaminup", function()
+    net.Receive("DrinkingtheStaminUp", function()
         surface.PlaySound("perks/buy_stam.wav")
     end)
 
-    net.Receive("StaminBlurHUD", function()
-        hook.Add("HUDPaint", "StaminBlurHUD", function()
+    net.Receive("StaminUpBlurHUD", function()
+        hook.Add("HUDPaint", "StaminUpBlurHUD", function()
             if IsValid(LocalPlayer()) and IsValid(LocalPlayer():GetActiveWeapon()) and LocalPlayer():GetActiveWeapon():GetClass() == "ttt_perk_staminup" then
                 DrawMotionBlur(0.4, 0.8, 0.01)
             end
         end)
 
         timer.Simple(0.7, function()
-            hook.Remove("HUDPaint", "StaminBlurHUD")
+            hook.Remove("HUDPaint", "StaminUpBlurHUD")
         end)
     end)
 end
@@ -117,44 +117,46 @@ end)
 function SWEP:Initialize()
     timer.Simple(0.1, function()
         local equip_id = TTT2 and "item_ttt_staminup" or EQUIP_STAMINUP
-        if (not IsValid(self)) or (not IsValid(self:GetOwner())) then return end
+        if not IsValid(self) then return end
+        local owner = self:GetOwner()
+        if not IsValid(owner) then return end
 
-        if not self:GetOwner():HasEquipmentItem(equip_id) then
+        if not owner:HasEquipmentItem(equip_id) then
             if CLIENT then
                 hook.Run("TTTBoughtItem", equip_id, equip_id)
             else
-                self:GetOwner():GiveEquipmentItem(equip_id)
+                owner:GiveEquipmentItem(equip_id)
             end
         end
 
         if SERVER then
-            self:GetOwner():SelectWeapon(self:GetClass())
-            net.Start("DrinkingtheStaminup")
-            net.Send(self:GetOwner())
+            owner:SelectWeapon(self:GetClass())
+            owner:ChatPrint("STAMINUP:\nSprint speed increased!")
+            net.Start("DrinkingtheStaminUp")
+            net.Send(owner)
 
             timer.Simple(0.5, function()
-                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
+                if IsValid(owner) and owner:IsTerror() then
                     self:EmitSound("perks/open.wav")
-                    self:GetOwner():ChatPrint("PERK BOTTLE EFFECT:\nYou can run really fast!")
-                    self:GetOwner():ViewPunch(Angle(-1, 1, 0))
+                    owner:ViewPunch(Angle(-1, 1, 0))
 
                     timer.Simple(0.8, function()
-                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
+                        if IsValid(owner) and owner:IsTerror() then
                             self:EmitSound("perks/drink.wav")
-                            self:GetOwner():ViewPunch(Angle(-2.5, 0, 0))
+                            owner:ViewPunch(Angle(-2.5, 0, 0))
 
                             timer.Simple(1, function()
-                                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
+                                if IsValid(owner) and owner:IsTerror() then
                                     self:EmitSound("perks/smash.wav")
-                                    net.Start("StaminBlurHUD")
-                                    net.Send(self:GetOwner())
+                                    net.Start("StaminUpBlurHUD")
+                                    net.Send(owner)
 
-                                    timer.Create("TTTStaminUp" .. self:GetOwner():EntIndex(), 0.8, 1, function()
-                                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
+                                    timer.Create("TTTStaminUp" .. owner:EntIndex(), 0.8, 1, function()
+                                        if IsValid(owner) and owner:IsTerror() then
                                             self:EmitSound("perks/burp.wav")
-                                            self:GetOwner():SetRunSpeed(400)
-                                            self:GetOwner():SetNWBool("StaminUpActive", true)
-                                            self:GetOwner():SetNWBool("StaminUpFix", true)
+                                            owner:SetRunSpeed(400)
+                                            owner:SetNWBool("StaminUpActive", true)
+                                            owner:SetNWBool("StaminUpFix", true)
                                             self:Remove()
                                         end
                                     end)
@@ -180,13 +182,11 @@ function SWEP:Initialize()
             end)
         end
 
-        if CLIENT then
-            if self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
-                local vm = LocalPlayer():GetViewModel()
-                local mat = "models/perk_bottle/c_perk_bottle_stamin" --perk_materials[self:GetPerk()]
-                oldmat = vm:GetMaterial() or ""
-                vm:SetMaterial(mat)
-            end
+        if CLIENT and owner == LocalPlayer() and LocalPlayer().GetViewModel then
+            local vm = LocalPlayer():GetViewModel()
+            local mat = "models/perk_bottle/c_perk_bottle_stamin"
+            oldmat = vm:GetMaterial() or ""
+            vm:SetMaterial(mat)
         end
     end)
 

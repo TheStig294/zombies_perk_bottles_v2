@@ -90,6 +90,12 @@ if SERVER then
     hook.Add("TTTOrderedEquipment", "TTTDoubleTap", function(ply, id, is_item)
         if id == EQUIP_DOUBLETAP then
             ply:Give("ttt_perk_doubletap")
+
+            timer.Simple(0.2, function()
+                if not IsValid(ply) or not ply:Alive() or ply:IsSpec() or ply:HasWeapon("ttt_perk_doubletap") then return end
+                ply:EmitSound("perks/burp.wav")
+                ply:SetNWBool("DoubleTapActive", true)
+            end)
         end
     end)
 end

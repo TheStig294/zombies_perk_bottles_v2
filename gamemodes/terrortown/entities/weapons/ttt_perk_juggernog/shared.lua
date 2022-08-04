@@ -147,7 +147,7 @@ function SWEP:Initialize()
 
                                     timer.Create("TTTJuggernog" .. owner:EntIndex(), 0.8, 1, function()
                                         if IsValid(owner) and owner:IsTerror() then
-                                            owner:EmitSound("perks/burp.wav")
+                                            self:EmitSound("perks/burp.wav")
                                             owner:SetHealth(owner:GetMaxHealth() * 1.5)
                                             owner:SetNWBool("JuggernogActive", true)
                                             self:Remove()

@@ -161,42 +161,44 @@ end
 function SWEP:Initialize()
     timer.Simple(0.1, function()
         local equip_id = TTT2 and "item_ttt_doubletap" or EQUIP_DOUBLETAP
-        if (not IsValid(self)) or (not IsValid(self:GetOwner())) then return end
+        if not IsValid(self) then return end
+        local owner = self:GetOwner()
+        if not IsValid(owner) then return end
 
-        if not self:GetOwner():HasEquipmentItem(equip_id) then
+        if not owner:HasEquipmentItem(equip_id) then
             if CLIENT then
                 hook.Run("TTTBoughtItem", equip_id, equip_id)
             else
-                self:GetOwner():GiveEquipmentItem(equip_id)
+                owner:GiveEquipmentItem(equip_id)
             end
         end
 
         if SERVER then
-            self:GetOwner():SelectWeapon(self:GetClass())
+            owner:SelectWeapon(self:GetClass())
+            owner:ChatPrint("DOUBLETAP:\nShooting speed increased!")
             net.Start("DrinkingtheDoubleTap")
-            net.Send(self:GetOwner())
+            net.Send(owner)
 
             timer.Simple(0.5, function()
-                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
+                if IsValid(owner) and owner:IsTerror() then
                     self:EmitSound("perks/open.wav")
-                    self:GetOwner():ChatPrint("PERK BOTTLE EFFECT:\nYour shooting speed is increased!")
-                    self:GetOwner():ViewPunch(Angle(-1, 1, 0))
+                    owner:ViewPunch(Angle(-1, 1, 0))
 
                     timer.Simple(0.8, function()
-                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
+                        if IsValid(owner) and owner:IsTerror() then
                             self:EmitSound("perks/drink.wav")
-                            self:GetOwner():ViewPunch(Angle(-2.5, 0, 0))
+                            owner:ViewPunch(Angle(-2.5, 0, 0))
 
                             timer.Simple(1, function()
-                                if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
+                                if IsValid(owner) and owner:IsTerror() then
                                     self:EmitSound("perks/smash.wav")
                                     net.Start("DoubleTapBlurHUD")
-                                    net.Send(self:GetOwner())
+                                    net.Send(owner)
 
-                                    timer.Create("TTTDoubleTap" .. self:GetOwner():EntIndex(), 0.8, 1, function()
-                                        if IsValid(self) and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() then
+                                    timer.Create("TTTDoubleTap" .. owner:EntIndex(), 0.8, 1, function()
+                                        if IsValid(owner) and owner:IsTerror() then
                                             self:EmitSound("perks/burp.wav")
-                                            self:GetOwner():SetNWBool("DoubleTapActive", true)
+                                            owner:SetNWBool("DoubleTapActive", true)
                                             self:Remove()
                                         end
                                     end)
@@ -208,13 +210,11 @@ function SWEP:Initialize()
             end)
         end
 
-        if CLIENT then
-            if self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
-                local vm = LocalPlayer():GetViewModel()
-                local mat = "models/perk_bottle/c_perk_bottle_doubletap" --perk_materials[self:GetPerk()]
-                oldmat = vm:GetMaterial() or ""
-                vm:SetMaterial(mat)
-            end
+        if CLIENT and owner == LocalPlayer() and LocalPlayer().GetViewModel then
+            local vm = LocalPlayer():GetViewModel()
+            local mat = "models/perk_bottle/c_perk_bottle_doubletap"
+            oldmat = vm:GetMaterial() or ""
+            vm:SetMaterial(mat)
         end
     end)
 
