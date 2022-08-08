@@ -234,6 +234,7 @@ if CLIENT then
     net.Receive("DoubletapApply", function()
         local apply = net.ReadBool()
         local wep = net.ReadEntity()
+        if not IsValid(wep) then return end
         wep.Primary.Delay = net.ReadFloat()
 
         if apply then
