@@ -83,7 +83,7 @@ function ApplySpeed(wep)
             wep.OldThink = wep.Think
 
             wep.Think = function(self, ...)
-                if IsValid(self) and self.Reloading and IsFirstTimePredicted() and self.reloadtimer <= CurTime() and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() and IsValid(self:GetOwner():GetActiveWeapon()) and self:GetOwner():GetActiveWeapon() == self then
+                if IsValid(self) and self.Reloading and IsFirstTimePredicted() and self.reloadtimer and self.reloadtimer <= CurTime() and IsValid(self:GetOwner()) and self:GetOwner():IsTerror() and IsValid(self:GetOwner():GetActiveWeapon()) and self:GetOwner():GetActiveWeapon() == self then
                     local maxclip = self.Primary.ClipSize
                     local curclip = self:Clip1()
                     local amounttoreplace = math.min(maxclip - curclip, self:GetOwner():GetAmmoCount(self.Primary.Ammo))
