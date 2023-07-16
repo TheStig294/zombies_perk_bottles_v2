@@ -317,6 +317,17 @@ if CLIENT then
     end)
 end
 
+local function SWEPRemoved(wep, owner)
+    if IsValid(wep) then
+        return false
+    else
+        owner:EmitSound("perks/burp.wav")
+        owner:SetNWBool("SpeedColaActive", true)
+
+        return true
+    end
+end
+
 function SWEP:Initialize()
     timer.Simple(0.1, function()
         local equip_id = TTT2 and "item_ttt_speedcola" or EQUIP_SPEEDCOLA
@@ -340,22 +351,26 @@ function SWEP:Initialize()
 
             timer.Simple(0.5, function()
                 if IsValid(owner) and owner:IsTerror() then
+                    if SWEPRemoved(self, owner) then return end
                     self:EmitSound("perks/open.wav")
                     owner:ViewPunch(Angle(-1, 1, 0))
 
                     timer.Simple(0.8, function()
                         if IsValid(owner) and owner:IsTerror() then
+                            if SWEPRemoved(self, owner) then return end
                             self:EmitSound("perks/drink.wav")
                             owner:ViewPunch(Angle(-2.5, 0, 0))
 
                             timer.Simple(1, function()
                                 if IsValid(owner) and owner:IsTerror() then
+                                    if SWEPRemoved(self, owner) then return end
                                     self:EmitSound("perks/smash.wav")
                                     net.Start("SpeedColaBlurHUD")
                                     net.Send(owner)
 
                                     timer.Create("TTTSpeedCola" .. owner:EntIndex(), 0.8, 1, function()
                                         if IsValid(owner) and owner:IsTerror() then
+                                            if SWEPRemoved(self, owner) then return end
                                             self:EmitSound("perks/burp.wav")
                                             owner:SetNWBool("SpeedColaActive", true)
                                             self:Remove()

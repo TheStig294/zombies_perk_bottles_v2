@@ -114,6 +114,18 @@ hook.Add("TTTPlayerSpeedModifier", "StaminUpSpeed", function(ply)
     if ply:HasEquipmentItem(equip_id) and ply:GetNWBool("StaminUpActive", false) then return 1.5 end
 end)
 
+local function SWEPRemoved(wep, owner)
+    if IsValid(wep) then
+        return false
+    else
+        owner:SetRunSpeed(400)
+        owner:SetNWBool("StaminUpActive", true)
+        owner:SetNWBool("StaminUpFix", true)
+
+        return true
+    end
+end
+
 function SWEP:Initialize()
     timer.Simple(0.1, function()
         local equip_id = TTT2 and "item_ttt_staminup" or EQUIP_STAMINUP
@@ -137,22 +149,26 @@ function SWEP:Initialize()
 
             timer.Simple(0.5, function()
                 if IsValid(owner) and owner:IsTerror() then
+                    if SWEPRemoved(self, owner) then return end
                     self:EmitSound("perks/open.wav")
                     owner:ViewPunch(Angle(-1, 1, 0))
 
                     timer.Simple(0.8, function()
                         if IsValid(owner) and owner:IsTerror() then
+                            if SWEPRemoved(self, owner) then return end
                             self:EmitSound("perks/drink.wav")
                             owner:ViewPunch(Angle(-2.5, 0, 0))
 
                             timer.Simple(1, function()
                                 if IsValid(owner) and owner:IsTerror() then
+                                    if SWEPRemoved(self, owner) then return end
                                     self:EmitSound("perks/smash.wav")
                                     net.Start("StaminUpBlurHUD")
                                     net.Send(owner)
 
                                     timer.Create("TTTStaminUp" .. owner:EntIndex(), 0.8, 1, function()
                                         if IsValid(owner) and owner:IsTerror() then
+                                            if SWEPRemoved(self, owner) then return end
                                             self:EmitSound("perks/burp.wav")
                                             owner:SetRunSpeed(400)
                                             owner:SetNWBool("StaminUpActive", true)
