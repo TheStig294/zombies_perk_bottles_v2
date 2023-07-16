@@ -118,9 +118,11 @@ local function SWEPRemoved(wep, owner)
     if IsValid(wep) then
         return false
     else
-        owner:SetRunSpeed(400)
-        owner:SetNWBool("StaminUpActive", true)
-        owner:SetNWBool("StaminUpFix", true)
+        if GetRoundState() == ROUND_ACTIVE then
+            owner:SetRunSpeed(400)
+            owner:SetNWBool("StaminUpActive", true)
+            owner:SetNWBool("StaminUpFix", true)
+        end
 
         return true
     end

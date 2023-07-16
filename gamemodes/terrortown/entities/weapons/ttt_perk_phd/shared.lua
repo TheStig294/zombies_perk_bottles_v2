@@ -131,8 +131,10 @@ local function SWEPRemoved(wep, owner)
     if IsValid(wep) then
         return false
     else
-        owner:EmitSound("perks/burp.wav")
-        owner:SetNWBool("PHDActive", true)
+        if GetRoundState() == ROUND_ACTIVE then
+            owner:EmitSound("perks/burp.wav")
+            owner:SetNWBool("PHDActive", true)
+        end
 
         return true
     end

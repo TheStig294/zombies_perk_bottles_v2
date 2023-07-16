@@ -112,9 +112,11 @@ local function SWEPRemoved(wep, owner)
     if IsValid(wep) then
         return false
     else
-        owner:EmitSound("perks/burp.wav")
-        owner:SetHealth(owner:GetMaxHealth() * 1.5)
-        owner:SetNWBool("JuggernogActive", true)
+        if GetRoundState() == ROUND_ACTIVE then
+            owner:EmitSound("perks/burp.wav")
+            owner:SetHealth(owner:GetMaxHealth() * 1.5)
+            owner:SetNWBool("JuggernogActive", true)
+        end
 
         return true
     end

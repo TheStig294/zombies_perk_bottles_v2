@@ -162,8 +162,10 @@ local function SWEPRemoved(wep, owner)
     if IsValid(wep) then
         return false
     else
-        owner:EmitSound("perks/burp.wav")
-        owner:SetNWBool("DoubleTapActive", true)
+        if GetRoundState() == ROUND_ACTIVE then
+            owner:EmitSound("perks/burp.wav")
+            owner:SetNWBool("DoubleTapActive", true)
+        end
 
         return true
     end
