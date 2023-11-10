@@ -1,8 +1,9 @@
---if TTT2 then return end
+-- The vanilla TTT version of the buy menu passive item for speed cola
+-- All it does is give the player the perk bottle SWEP on purchase, which handles all the rest
 if SERVER then
     AddCSLuaFile()
     resource.AddFile("materials/vgui/ttt/ic_speedcola.vmt")
-    resource.AddFile("materials/vgui/ttt/perks/hud_speed.png")
+    resource.AddFile("materials/vgui/ttt/perks/hud_speedcola.png")
 end
 
 if CLIENT then
@@ -13,7 +14,7 @@ if CLIENT then
     local function getYCoordinate(currentPerkID)
         local amount, i, perk = 0, 1
 
-        while (i < currentPerkID) do
+        while i < currentPerkID do
             local role = LocalPlayer():GetRole()
 
             --he gets it in a special way
@@ -27,7 +28,7 @@ if CLIENT then
 
             perk = GetEquipmentItem(role, i)
 
-            if (istable(perk) and perk.hud and LocalPlayer():HasEquipmentItem(perk.id)) then
+            if istable(perk) and perk.hud and LocalPlayer():HasEquipmentItem(perk.id) then
                 amount = amount + 1
             end
 
@@ -41,12 +42,12 @@ if CLIENT then
 
     -- best performance, but the has about 0.5 seconds delay to the HasEquipmentItem() function
     hook.Add("TTTBoughtItem", "TTTSpeedCola", function()
-        if (LocalPlayer():HasEquipmentItem(EQUIP_SPEEDCOLA)) then
+        if LocalPlayer():HasEquipmentItem(EQUIP_SPEEDCOLA) then
             yCoordinate = getYCoordinate(EQUIP_SPEEDCOLA)
         end
     end)
 
-    local material = Material("vgui/ttt/perks/hud_speed.png")
+    local material = Material("vgui/ttt/perks/hud_speedcola.png")
 
     hook.Add("HUDPaint", "TTTSpeedCola", function()
         if LocalPlayer():GetNWBool("SpeedColaActive", false) and LocalPlayer():HasEquipmentItem(EQUIP_SPEEDCOLA) then
@@ -66,20 +67,15 @@ local SpeedCola = {
     type = "item_passive",
     material = "vgui/ttt/ic_speedcola",
     name = "Speed Cola",
-    desc = "Doubles your reload speed of ordinary guns.",
+    desc = "Increases reload speed of ordinary guns",
     hud = true
 }
 
-if GetConVar("ttt_speedcola_detective"):GetBool() and GetConVar("ttt_speedcola_traitor"):GetBool() then
-    table.insert(EquipmentItems[ROLE_DETECTIVE], SpeedCola)
+if GetConVar("ttt_speedcola_traitor"):GetBool() then
     table.insert(EquipmentItems[ROLE_TRAITOR], SpeedCola)
 end
 
-if GetConVar("ttt_speedcola_detective"):GetBool() == false and GetConVar("ttt_speedcola_traitor"):GetBool() then
-    table.insert(EquipmentItems[ROLE_TRAITOR], SpeedCola)
-end
-
-if GetConVar("ttt_speedcola_detective"):GetBool() and GetConVar("ttt_speedcola_traitor"):GetBool() == false then
+if GetConVar("ttt_speedcola_detective"):GetBool() then
     table.insert(EquipmentItems[ROLE_DETECTIVE], SpeedCola)
 end
 
@@ -107,7 +103,7 @@ if CLIENT then
     end)
 
     hook.Add("TTTBodySearchPopulate", "SpeedColaCorpseIcon", function(search, raw)
-        if (not raw.eq_speedcola) then return end
+        if not raw.eq_speedcola then return end
         local highest = 0
 
         for _, v in pairs(search) do

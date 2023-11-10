@@ -4,7 +4,7 @@ if SERVER then
     util.AddNetworkString("SpeedColaBlurHUD")
     resource.AddFile("sound/perks/buy_speed.wav")
     resource.AddFile("models/weapons/c_perk_bottle.mdl")
-    resource.AddFile("materials/models/perk_bottle/c_perk_bottle_speed.vmt")
+    resource.AddFile("materials/models/perk_bottle/c_perk_bottle_speedcola.vmt")
 end
 
 SWEP.Author = "Gamefreak"
@@ -52,9 +52,13 @@ function SWEP:OnDrop()
     end
 end
 
+local speedMultCvar = GetConVar("ttt_speedcola_speed_multiplier")
+
 function ApplySpeed(wep)
-    if (wep.Kind == WEAPON_HEAVY or wep.Kind == WEAPON_PISTOL) then
-        wep:SetDeploySpeed(2)
+    local speedMult = speedMultCvar:GetFloat()
+
+    if wep.Kind == WEAPON_HEAVY or wep.Kind == WEAPON_PISTOL then
+        wep:SetDeploySpeed(speedMult)
 
         if wep.AmmoEnt ~= "item_box_buckshot_ttt" then
             wep.OldReload = wep.Reload
@@ -67,10 +71,10 @@ function ApplySpeed(wep)
                 self.Reloading = true
                 self:SendWeaponAnim(ACT_VM_RELOAD)
                 local sequencetime = self:SequenceDuration()
-                diff = sequencetime / 2 + ct
+                diff = sequencetime / speedMult + ct
                 self.reloadtimer = diff
-                self:SetPlaybackRate(2)
-                self:GetOwner():GetViewModel():SetPlaybackRate(2)
+                self:SetPlaybackRate(speedMult)
+                self:GetOwner():GetViewModel():SetPlaybackRate(speedMult)
                 self:SetNextPrimaryFire(diff)
                 self:SetNextSecondaryFire(diff)
                 self:GetOwner():SetFOV(0, 0.2)
@@ -120,12 +124,11 @@ function ApplySpeed(wep)
                     self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
                     local ply = self:GetOwner()
                     if not ply or ply:GetAmmoCount(self.Primary.Ammo) <= 0 then return false end
-                    local wep = self
-                    if wep:Clip1() >= self.Primary.ClipSize then return false end
-                    wep:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
-                    self:SetPlaybackRate(2)
-                    self:GetOwner():GetViewModel():SetPlaybackRate(2)
-                    self.reloadtimer = CurTime() + wep:SequenceDuration() / 2
+                    if self:Clip1() >= self.Primary.ClipSize then return false end
+                    self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
+                    self:SetPlaybackRate(speedMult)
+                    self:GetOwner():GetViewModel():SetPlaybackRate(speedMult)
+                    self.reloadtimer = CurTime() + self:SequenceDuration() / speedMult
                     self:SetReloading(true)
 
                     return true
@@ -140,17 +143,17 @@ function ApplySpeed(wep)
                     self:GetOwner():RemoveAmmo(1, self.Primary.Ammo, false)
                     self:SetClip1(self:Clip1() + 1)
                     self:SendWeaponAnim(ACT_VM_RELOAD)
-                    self:SetPlaybackRate(2)
-                    self:GetOwner():GetViewModel():SetPlaybackRate(2)
-                    self:SetReloadTimer(CurTime() + self:SequenceDuration() / 2)
+                    self:SetPlaybackRate(speedMult)
+                    self:GetOwner():GetViewModel():SetPlaybackRate(speedMult)
+                    self:SetReloadTimer(CurTime() + self:SequenceDuration() / speedMult)
                 end
 
                 wep.FinishReload = function(self, ...)
                     self:SetReloading(false)
                     self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
-                    self:SetPlaybackRate(2)
-                    self:GetOwner():GetViewModel():SetPlaybackRate(2)
-                    self:SetReloadTimer(CurTime() + self:SequenceDuration() / 2)
+                    self:SetPlaybackRate(speedMult)
+                    self:GetOwner():GetViewModel():SetPlaybackRate(speedMult)
+                    self:SetReloadTimer(CurTime() + self:SequenceDuration() / speedMult)
                 end
 
                 wep.OldOnDrop = wep.OnDrop
@@ -175,12 +178,11 @@ function ApplySpeed(wep)
                     self:SetNextPrimaryFire(CurTime() + self.Primary.Delay)
                     local ply = self:GetOwner()
                     if not ply or ply:GetAmmoCount(self.Primary.Ammo) <= 0 then return false end
-                    local wep = self
-                    if wep:Clip1() >= self.Primary.ClipSize then return false end
-                    wep:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
-                    self:SetPlaybackRate(2)
-                    self:GetOwner():GetViewModel():SetPlaybackRate(2)
-                    self.reloadtimer = CurTime() + wep:SequenceDuration() / 2
+                    if self:Clip1() >= self.Primary.ClipSize then return false end
+                    self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_START)
+                    self:SetPlaybackRate(speedMult)
+                    self:GetOwner():GetViewModel():SetPlaybackRate(speedMult)
+                    self.reloadtimer = CurTime() + self:SequenceDuration() / speedMult
                     self.dt.reloading = true
 
                     return true
@@ -195,17 +197,17 @@ function ApplySpeed(wep)
                     self:GetOwner():RemoveAmmo(1, self.Primary.Ammo, false)
                     self:SetClip1(self:Clip1() + 1)
                     self:SendWeaponAnim(ACT_VM_RELOAD)
-                    self:SetPlaybackRate(2)
-                    self:GetOwner():GetViewModel():SetPlaybackRate(2)
-                    self.reloadtimer = CurTime() + self:SequenceDuration() / 2
+                    self:SetPlaybackRate(speedMult)
+                    self:GetOwner():GetViewModel():SetPlaybackRate(speedMult)
+                    self.reloadtimer = CurTime() + self:SequenceDuration() / speedMult
                 end
 
                 wep.FinishReload = function(self, ...)
                     self.dt.reloading = false
                     self:SendWeaponAnim(ACT_SHOTGUN_RELOAD_FINISH)
-                    self:SetPlaybackRate(2)
-                    self:GetOwner():GetViewModel():SetPlaybackRate(2)
-                    self.reloadtimer = CurTime() + self:SequenceDuration() / 2
+                    self:SetPlaybackRate(speedMult)
+                    self:GetOwner():GetViewModel():SetPlaybackRate(speedMult)
+                    self.reloadtimer = CurTime() + self:SequenceDuration() / speedMult
                 end
 
                 wep.OldOnDrop = wep.OnDrop
@@ -228,7 +230,7 @@ function ApplySpeed(wep)
 end
 
 function RemoveSpeed(wep)
-    if (wep.Kind == WEAPON_HEAVY or wep.Kind == WEAPON_PISTOL) then
+    if wep.Kind == WEAPON_HEAVY or wep.Kind == WEAPON_PISTOL then
         wep:SetDeploySpeed(1)
         wep.Reloading = false
 
@@ -253,7 +255,7 @@ function RemoveSpeed(wep)
 end
 
 hook.Add("PlayerSwitchWeapon", "TTTSpeedEnable", function(ply, old, new)
-    local equip_id = TTT2 and "item_ttt_speed" or EQUIP_SPEEDCOLA
+    local equip_id = TTT2 and "item_ttt_speedcola" or EQUIP_SPEEDCOLA
 
     if ply:GetNWBool("SpeedColaActive", false) and ply:HasEquipmentItem(equip_id) then
         ApplySpeed(new)
@@ -269,7 +271,7 @@ hook.Add("TTTPrepareRound", "TTTSpeedReset", function()
 end)
 
 hook.Add("DoPlayerDeath", "TTTSpeedReset", function(ply)
-    local equip_id = TTT2 and "item_ttt_speed" or EQUIP_SPEEDCOLA
+    local equip_id = TTT2 and "item_ttt_speedcola" or EQUIP_SPEEDCOLA
 
     if ply:HasEquipmentItem(equip_id) then
         ply:SetNWBool("SpeedColaActive", false)
@@ -277,14 +279,17 @@ hook.Add("DoPlayerDeath", "TTTSpeedReset", function(ply)
 end)
 
 function SWEP:OnRemove()
-    if CLIENT and IsValid(self:GetOwner()) and self:GetOwner() == LocalPlayer() and self:GetOwner():Alive() then
+    if SERVER then return end
+    local client = LocalPlayer()
+
+    if IsValid(self:GetOwner()) and self:GetOwner() == client and self:GetOwner():Alive() then
         RunConsoleCommand("lastinv")
     end
 
-    if CLIENT and self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
-        local vm = LocalPlayer():GetViewModel()
-        vm:SetMaterial(oldmat)
-        oldmat = nil
+    if self:GetOwner() == client and client.GetViewModel then
+        local vm = client:GetViewModel()
+        vm:SetMaterial(PERK_BOTTLE_OLD_MATERIAL)
+        PERK_BOTTLE_OLD_MATERIAL = nil
     end
 end
 
@@ -305,8 +310,10 @@ if CLIENT then
     end)
 
     net.Receive("SpeedColaBlurHUD", function()
+        local client = LocalPlayer()
+
         hook.Add("HUDPaint", "SpeedColaBlurHUD", function()
-            if IsValid(LocalPlayer()) and IsValid(LocalPlayer():GetActiveWeapon()) and LocalPlayer():GetActiveWeapon():GetClass() == "ttt_perk_speed" then
+            if IsValid(client) and IsValid(client:GetActiveWeapon()) and client:GetActiveWeapon():GetClass() == "ttt_perk_speedcola" then
                 DrawMotionBlur(0.4, 0.8, 0.01)
             end
         end)
@@ -386,11 +393,15 @@ function SWEP:Initialize()
             end)
         end
 
-        if CLIENT and owner == LocalPlayer() and LocalPlayer().GetViewModel then
-            local vm = LocalPlayer():GetViewModel()
-            local mat = "models/perk_bottle/c_perk_bottle_speed"
-            oldmat = vm:GetMaterial() or ""
-            vm:SetMaterial(mat)
+        if CLIENT then
+            local client = LocalPlayer()
+
+            if owner == client and client.GetViewModel then
+                local vm = client:GetViewModel()
+                local mat = "models/perk_bottle/c_perk_bottle_speedcola"
+                PERK_BOTTLE_OLD_MATERIAL = vm:GetMaterial() or ""
+                vm:SetMaterial(mat)
+            end
         end
     end)
 
@@ -398,10 +409,11 @@ function SWEP:Initialize()
 end
 
 function SWEP:GetViewModelPosition(pos, ang)
-    local newpos = LocalPlayer():EyePos()
-    local newang = LocalPlayer():EyeAngles()
+    local client = LocalPlayer()
+    local newpos = client:EyePos()
+    local newang = client:EyeAngles()
     local up = newang:Up()
-    newpos = newpos + LocalPlayer():GetAimVector() * 3 - up * 65
+    newpos = newpos + client:GetAimVector() * 3 - up * 65
 
     return newpos, newang
 end

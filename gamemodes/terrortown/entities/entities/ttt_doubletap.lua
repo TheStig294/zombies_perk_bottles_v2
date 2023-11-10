@@ -1,3 +1,5 @@
+-- The vanilla TTT version of the buy menu passive item for doubletap
+-- All it does is give the player the perk bottle SWEP on purchase, which handles all the rest
 if SERVER then
     AddCSLuaFile()
     resource.AddFile("materials/vgui/ttt/ic_doubletap.vmt")
@@ -12,7 +14,7 @@ if CLIENT then
     local function getYCoordinate(currentPerkID)
         local amount, i, perk = 0, 1
 
-        while (i < currentPerkID) do
+        while i < currentPerkID do
             local role = LocalPlayer():GetRole()
 
             --he gets it in a special way
@@ -26,7 +28,7 @@ if CLIENT then
 
             perk = GetEquipmentItem(role, i)
 
-            if (istable(perk) and perk.hud and LocalPlayer():HasEquipmentItem(perk.id)) then
+            if istable(perk) and perk.hud and LocalPlayer():HasEquipmentItem(perk.id) then
                 amount = amount + 1
             end
 
@@ -40,7 +42,7 @@ if CLIENT then
 
     -- best performance, but the has about 0.5 seconds delay to the HasEquipmentItem() function
     hook.Add("TTTBoughtItem", "TTTDoubleTap", function()
-        if (LocalPlayer():HasEquipmentItem(EQUIP_DOUBLETAP)) then
+        if LocalPlayer():HasEquipmentItem(EQUIP_DOUBLETAP) then
             yCoordinate = getYCoordinate(EQUIP_DOUBLETAP)
         end
     end)
@@ -64,21 +66,16 @@ local DoubleTap = {
     loadout = false,
     type = "item_passive",
     material = "vgui/ttt/ic_doubletap",
-    name = "DoubleTap Root Beer",
-    desc = "Shoot 50% faster with any ordinary gun.",
+    name = "Doubletap Root Beer",
+    desc = "Makes you shoot faster with any ordinary gun",
     hud = true
 }
 
-if GetConVar("ttt_doubletap_detective"):GetBool() and GetConVar("ttt_doubletap_traitor"):GetBool() then
-    table.insert(EquipmentItems[ROLE_DETECTIVE], DoubleTap)
+if GetConVar("ttt_doubletap_traitor"):GetBool() then
     table.insert(EquipmentItems[ROLE_TRAITOR], DoubleTap)
 end
 
-if GetConVar("ttt_doubletap_detective"):GetBool() == false and GetConVar("ttt_doubletap_traitor"):GetBool() then
-    table.insert(EquipmentItems[ROLE_TRAITOR], DoubleTap)
-end
-
-if GetConVar("ttt_doubletap_detective"):GetBool() and GetConVar("ttt_doubletap_traitor"):GetBool() == false then
+if GetConVar("ttt_doubletap_detective"):GetBool() then
     table.insert(EquipmentItems[ROLE_DETECTIVE], DoubleTap)
 end
 
@@ -106,7 +103,7 @@ if CLIENT then
     end)
 
     hook.Add("TTTBodySearchPopulate", "DoubleTapCorpseIcon", function(search, raw)
-        if (not raw.eq_doubletap) then return end
+        if not raw.eq_doubletap then return end
         local highest = 0
 
         for _, v in pairs(search) do

@@ -1,4 +1,5 @@
---if TTT2 then return end
+-- The vanilla TTT version of the buy menu passive item for juggernog
+-- All it does is give the player the perk bottle SWEP on purchase, which handles all the rest
 if SERVER then
     AddCSLuaFile()
     resource.AddFile("materials/vgui/ttt/ic_juggernog.vmt")
@@ -13,7 +14,7 @@ if CLIENT then
     local function getYCoordinate(currentPerkID)
         local amount, i, perk = 0, 1
 
-        while (i < currentPerkID) do
+        while i < currentPerkID do
             local role = LocalPlayer():GetRole()
 
             --he gets it in a special way
@@ -27,7 +28,7 @@ if CLIENT then
 
             perk = GetEquipmentItem(role, i)
 
-            if (istable(perk) and perk.hud and LocalPlayer():HasEquipmentItem(perk.id)) then
+            if istable(perk) and perk.hud and LocalPlayer():HasEquipmentItem(perk.id) then
                 amount = amount + 1
             end
 
@@ -41,7 +42,7 @@ if CLIENT then
 
     -- best performance, but the has about 0.5 seconds delay to the HasEquipmentItem() function
     hook.Add("TTTBoughtItem", "TTTJuggernog", function()
-        if (LocalPlayer():HasEquipmentItem(EQUIP_JUGGERNOG)) then
+        if LocalPlayer():HasEquipmentItem(EQUIP_JUGGERNOG) then
             yCoordinate = getYCoordinate(EQUIP_JUGGERNOG)
         end
     end)
@@ -66,20 +67,15 @@ local Juggernog = {
     type = "item_passive",
     material = "vgui/ttt/ic_juggernog",
     name = "Juggernog",
-    desc = "Fully heal and grants 50% higher health.",
+    desc = "Fully heals and increases your health",
     hud = true
 }
 
-if GetConVar("ttt_juggernog_detective"):GetBool() and GetConVar("ttt_juggernog_traitor"):GetBool() then
-    table.insert(EquipmentItems[ROLE_DETECTIVE], Juggernog)
+if GetConVar("ttt_juggernog_traitor"):GetBool() then
     table.insert(EquipmentItems[ROLE_TRAITOR], Juggernog)
 end
 
-if GetConVar("ttt_juggernog_detective"):GetBool() == false and GetConVar("ttt_juggernog_traitor"):GetBool() then
-    table.insert(EquipmentItems[ROLE_TRAITOR], Juggernog)
-end
-
-if GetConVar("ttt_juggernog_detective"):GetBool() and GetConVar("ttt_juggernog_traitor"):GetBool() == false then
+if GetConVar("ttt_juggernog_detective"):GetBool() then
     table.insert(EquipmentItems[ROLE_DETECTIVE], Juggernog)
 end
 
@@ -88,6 +84,8 @@ if SERVER then
         if tonumber(id) == EQUIP_JUGGERNOG and ply:IsDrinking() then return false end
     end)
 
+    local healthMultCvar = GetConVar("ttt_juggernog_health_multiplier"):GetFloat()
+
     hook.Add("TTTOrderedEquipment", "TTTJuggernog", function(ply, id, is_item)
         if id == EQUIP_JUGGERNOG then
             ply:Give("ttt_perk_juggernog")
@@ -95,7 +93,7 @@ if SERVER then
             timer.Simple(0.2, function()
                 if not IsValid(ply) or not ply:Alive() or ply:IsSpec() or ply:HasWeapon("ttt_perk_juggernog") then return end
                 ply:EmitSound("perks/burp.wav")
-                ply:SetHealth(ply:GetMaxHealth() * 1.5)
+                ply:SetHealth(ply:GetMaxHealth() * healthMultCvar:GetFloat())
                 ply:SetNWBool("JuggernogActive", true)
             end)
         end
@@ -108,7 +106,7 @@ if CLIENT then
     end)
 
     hook.Add("TTTBodySearchPopulate", "JuggernogCorpseIcon", function(search, raw)
-        if (not raw.eq_juggernog) then return end
+        if not raw.eq_juggernog then return end
         local highest = 0
 
         for _, v in pairs(search) do

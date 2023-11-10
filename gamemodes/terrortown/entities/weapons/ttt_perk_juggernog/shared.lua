@@ -60,16 +60,17 @@ hook.Add("DoPlayerDeath", "TTTJuggernogReset", function(pl)
 end)
 
 function SWEP:OnRemove()
-    if CLIENT and IsValid(self:GetOwner()) and self:GetOwner() == LocalPlayer() and self:GetOwner():Alive() then
+    if SERVER then return end
+    local client = LocalPlayer()
+
+    if IsValid(self:GetOwner()) and self:GetOwner() == client and self:GetOwner():Alive() then
         RunConsoleCommand("lastinv")
     end
 
-    if CLIENT then
-        if self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
-            local vm = LocalPlayer():GetViewModel()
-            vm:SetMaterial(oldmat)
-            oldmat = nil
-        end
+    if self:GetOwner() == client and client.GetViewModel then
+        local vm = client:GetViewModel()
+        vm:SetMaterial(PERK_BOTTLE_OLD_MATERIAL)
+        PERK_BOTTLE_OLD_MATERIAL = nil
     end
 end
 
@@ -96,8 +97,10 @@ if CLIENT then
     end)
 
     net.Receive("JuggerBlurHUD", function()
+        local client = LocalPlayer()
+
         hook.Add("HUDPaint", "JuggerBlurHUD", function()
-            if IsValid(LocalPlayer()) and IsValid(LocalPlayer():GetActiveWeapon()) and LocalPlayer():GetActiveWeapon():GetClass() == "ttt_perk_juggernog" then
+            if IsValid(client) and IsValid(client:GetActiveWeapon()) and client:GetActiveWeapon():GetClass() == "ttt_perk_juggernog" then
                 DrawMotionBlur(0.4, 0.8, 0.01)
             end
         end)
@@ -108,13 +111,15 @@ if CLIENT then
     end)
 end
 
+local healthMultCvar = GetConVar("ttt_juggernog_health_multiplier")
+
 local function SWEPRemoved(wep, owner)
     if IsValid(wep) then
         return false
     else
         if GetRoundState() == ROUND_ACTIVE then
             owner:EmitSound("perks/burp.wav")
-            owner:SetHealth(owner:GetMaxHealth() * 1.5)
+            owner:SetHealth(owner:GetMaxHealth() * healthMultCvar:GetFloat())
             owner:SetNWBool("JuggernogActive", true)
         end
 
@@ -166,7 +171,7 @@ function SWEP:Initialize()
                                         if IsValid(owner) and owner:IsTerror() then
                                             if SWEPRemoved(self, owner) then return end
                                             self:EmitSound("perks/burp.wav")
-                                            owner:SetHealth(owner:GetMaxHealth() * 1.5)
+                                            owner:SetHealth(owner:GetMaxHealth() * healthMultCvar:GetFloat())
                                             owner:SetNWBool("JuggernogActive", true)
                                             self:Remove()
                                         end
@@ -179,11 +184,15 @@ function SWEP:Initialize()
             end)
         end
 
-        if CLIENT and owner == LocalPlayer() and LocalPlayer().GetViewModel then
-            local vm = LocalPlayer():GetViewModel()
-            local mat = "models/perk_bottle/c_perk_bottle_jugg"
-            oldmat = vm:GetMaterial() or ""
-            vm:SetMaterial(mat)
+        if CLIENT then
+            local client = LocalPlayer()
+
+            if owner == client and client.GetViewModel then
+                local vm = client:GetViewModel()
+                local mat = "models/perk_bottle/c_perk_bottle_jugg"
+                PERK_BOTTLE_OLD_MATERIAL = vm:GetMaterial() or ""
+                vm:SetMaterial(mat)
+            end
         end
     end)
 
@@ -191,10 +200,11 @@ function SWEP:Initialize()
 end
 
 function SWEP:GetViewModelPosition(pos, ang)
-    local newpos = LocalPlayer():EyePos()
-    local newang = LocalPlayer():EyeAngles()
+    local client = LocalPlayer()
+    local newpos = client:EyePos()
+    local newang = client:EyeAngles()
     local up = newang:Up()
-    newpos = newpos + LocalPlayer():GetAimVector() * 3 - up * 65
+    newpos = newpos + client:GetAimVector() * 3 - up * 65
 
     return newpos, newang
 end

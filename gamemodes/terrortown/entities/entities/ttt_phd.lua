@@ -1,4 +1,5 @@
---if TTT2 then return end
+-- The vanilla TTT version of the buy menu passive item for phd flopper
+-- All it does is give the player the perk bottle SWEP on purchase, which handles all the rest
 if SERVER then
     AddCSLuaFile()
     resource.AddFile("materials/vgui/ttt/ic_phd.vmt")
@@ -13,7 +14,7 @@ if CLIENT then
     local function getYCoordinate(currentPerkID)
         local amount, i, perk = 0, 1
 
-        while (i < currentPerkID) do
+        while i < currentPerkID do
             local role = LocalPlayer():GetRole()
 
             --he gets it in a special way
@@ -27,7 +28,7 @@ if CLIENT then
 
             perk = GetEquipmentItem(role, i)
 
-            if (istable(perk) and perk.hud and LocalPlayer():HasEquipmentItem(perk.id)) then
+            if istable(perk) and perk.hud and LocalPlayer():HasEquipmentItem(perk.id) then
                 amount = amount + 1
             end
 
@@ -41,7 +42,7 @@ if CLIENT then
 
     -- best performance, but the has about 0.5 seconds delay to the HasEquipmentItem() function
     hook.Add("TTTBoughtItem", "TTTPHD", function()
-        if (LocalPlayer():HasEquipmentItem(EQUIP_PHD)) then
+        if LocalPlayer():HasEquipmentItem(EQUIP_PHD) then
             yCoordinate = getYCoordinate(EQUIP_PHD)
         end
     end)
@@ -66,20 +67,15 @@ local PHD = {
     type = "item_passive",
     material = "vgui/ttt/ic_phd",
     name = "PHD Flopper",
-    desc = "Instead of taking fall damage, cause a high-damage explosion where you land. \n\nGrants immunity to explosions.",
+    desc = "Instead of taking fall damage, cause a high-damage explosion where you land. \n\nGrants immunity to explosions",
     hud = true
 }
 
-if GetConVar("ttt_phd_detective"):GetBool() and GetConVar("ttt_phd_traitor"):GetBool() then
-    table.insert(EquipmentItems[ROLE_DETECTIVE], PHD)
+if GetConVar("ttt_phd_traitor"):GetBool() then
     table.insert(EquipmentItems[ROLE_TRAITOR], PHD)
 end
 
-if GetConVar("ttt_phd_detective"):GetBool() == false and GetConVar("ttt_phd_traitor"):GetBool() then
-    table.insert(EquipmentItems[ROLE_TRAITOR], PHD)
-end
-
-if GetConVar("ttt_phd_detective"):GetBool() and GetConVar("ttt_phd_traitor"):GetBool() == false then
+if GetConVar("ttt_phd_detective"):GetBool() then
     table.insert(EquipmentItems[ROLE_DETECTIVE], PHD)
 end
 
@@ -107,7 +103,7 @@ if CLIENT then
     end)
 
     hook.Add("TTTBodySearchPopulate", "PHDCorpseIcon", function(search, raw)
-        if (not raw.eq_phd) then return end
+        if not raw.eq_phd then return end
         local highest = 0
 
         for _, v in pairs(search) do

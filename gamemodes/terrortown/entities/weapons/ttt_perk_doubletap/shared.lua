@@ -1,3 +1,6 @@
+-- The doubletap perk bottle itself,
+-- given by items/item_ttt_doubletap if TTT2 is installed,
+-- or by entities/ttt_doubletap.lua otherwise
 if SERVER then
     AddCSLuaFile("shared.lua")
     util.AddNetworkString("DoubleTapBlurHUD")
@@ -46,12 +49,11 @@ SWEP.DrawCrosshair = false
 SWEP.ViewModelFlip = false
 SWEP.DeploySpeed = 4
 SWEP.UseHands = true
+local firerateCvar = GetConVar("ttt_doubletap_firerate_multiplier")
 
 function ApplyDoubleTap(wep)
     if (wep.Kind == WEAPON_HEAVY or wep.Kind == WEAPON_PISTOL) and isnumber(wep.Primary.Delay) then
-        local delay = math.Round(wep.Primary.Delay / 1.5, 3)
         wep.OldDelay = wep.Primary.Delay
-        wep.Primary.Delay = delay
         wep.OldOnDrop = wep.OnDrop
 
         wep.OnDrop = function(self, ...)
@@ -61,6 +63,8 @@ function ApplyDoubleTap(wep)
             end
         end
 
+        -- This is where the magic happens...
+        wep.Primary.Delay = math.Round(wep.Primary.Delay / firerateCvar:GetFloat(), 3)
         net.Start("DoubletapApply")
         net.WriteBool(true)
         net.WriteEntity(wep)
@@ -116,16 +120,17 @@ hook.Add("DoPlayerDeath", "TTTDoubleTapReset", function(ply)
 end)
 
 function SWEP:OnRemove()
-    if CLIENT and IsValid(self:GetOwner()) and self:GetOwner() == LocalPlayer() and self:GetOwner():Alive() then
+    if SERVER then return end
+    local client = LocalPlayer()
+
+    if IsValid(self:GetOwner()) and self:GetOwner() == client and self:GetOwner():Alive() then
         RunConsoleCommand("lastinv")
     end
 
-    if CLIENT then
-        if self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
-            local vm = LocalPlayer():GetViewModel()
-            vm:SetMaterial(oldmat)
-            oldmat = nil
-        end
+    if self:GetOwner() == client and client.GetViewModel then
+        local vm = client:GetViewModel()
+        vm:SetMaterial(PERK_BOTTLE_OLD_MATERIAL)
+        PERK_BOTTLE_OLD_MATERIAL = nil
     end
 end
 
@@ -146,8 +151,10 @@ if CLIENT then
     end)
 
     net.Receive("DoubleTapBlurHUD", function()
+        local client = LocalPlayer()
+
         hook.Add("HUDPaint", "DoubleTapBlurHUD", function()
-            if IsValid(LocalPlayer()) and IsValid(LocalPlayer():GetActiveWeapon()) and LocalPlayer():GetActiveWeapon():GetClass() == "ttt_perk_doubletap" then
+            if IsValid(client) and IsValid(client:GetActiveWeapon()) and client:GetActiveWeapon():GetClass() == "ttt_perk_doubletap" then
                 DrawMotionBlur(0.4, 0.8, 0.01)
             end
         end)
@@ -227,11 +234,15 @@ function SWEP:Initialize()
             end)
         end
 
-        if CLIENT and owner == LocalPlayer() and LocalPlayer().GetViewModel then
-            local vm = LocalPlayer():GetViewModel()
-            local mat = "models/perk_bottle/c_perk_bottle_doubletap"
-            oldmat = vm:GetMaterial() or ""
-            vm:SetMaterial(mat)
+        if CLIENT then
+            local client = LocalPlayer()
+
+            if owner == client and client.GetViewModel then
+                local vm = client:GetViewModel()
+                local mat = "models/perk_bottle/c_perk_bottle_doubletap"
+                PERK_BOTTLE_OLD_MATERIAL = vm:GetMaterial() or ""
+                vm:SetMaterial(mat)
+            end
         end
     end)
 
@@ -239,10 +250,11 @@ function SWEP:Initialize()
 end
 
 function SWEP:GetViewModelPosition(pos, ang)
-    local newpos = LocalPlayer():EyePos()
-    local newang = LocalPlayer():EyeAngles()
+    local client = LocalPlayer()
+    local newpos = client:EyePos()
+    local newang = client:EyeAngles()
     local up = newang:Up()
-    newpos = newpos + LocalPlayer():GetAimVector() * 3 - up * 65
+    newpos = newpos + client:GetAimVector() * 3 - up * 65
 
     return newpos, newang
 end

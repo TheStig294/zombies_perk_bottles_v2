@@ -1,3 +1,5 @@
+-- The TTT2 version of the buy menu passive item for juggernog
+-- All it does is give the player the perk bottle SWEP on purchase, which handles all the rest
 if SERVER then
     AddCSLuaFile()
     resource.AddFile("materials/vgui/ttt/ic_juggernog.vmt")
@@ -9,27 +11,33 @@ ITEM.hud = Material("vgui/ttt/perks/hud_juggernog_ttt2.png")
 ITEM.EquipMenuData = {
     type = "item_passive",
     name = "Juggernog",
-    desc = "Juggernog Perk.\nAutomatically drinks perk to get \nthe maximum health avaible!",
+    desc = "Fully heals and increases your health",
 }
 
 ITEM.credits = 1
 ITEM.material = "vgui/ttt/ic_juggernog"
+ITEM.CanBuy = {}
 
-if GetConVar("ttt_juggernog_detective"):GetBool() and GetConVar("ttt_juggernog_traitor"):GetBool() then
-    ITEM.CanBuy = {ROLE_TRAITOR, ROLE_DETECTIVE}
+if GetConVar("ttt_juggernog_traitor"):GetBool() then
+    table.insert(ITEM.CanBuy, ROLE_TRAITOR)
 end
 
-if GetConVar("ttt_juggernog_detective"):GetBool() == false and GetConVar("ttt_juggernog_traitor"):GetBool() then
-    ITEM.CanBuy = {ROLE_TRAITOR}
-end
-
-if GetConVar("ttt_juggernog_detective"):GetBool() and GetConVar("ttt_juggernog_traitor"):GetBool() == false then
-    ITEM.CanBuy = {ROLE_DETECTIVE}
+if GetConVar("ttt_juggernog_detective"):GetBool() then
+    table.insert(ITEM.CanBuy, ROLE_DETECTIVE)
 end
 
 if SERVER then
+    local healthMultCvar = GetConVar("ttt_juggernog_health_multiplier"):GetFloat()
+
     function ITEM:Bought(ply)
         ply:Give("ttt_perk_juggernog")
+
+        timer.Simple(0.2, function()
+            if not IsValid(ply) or not ply:Alive() or ply:IsSpec() or ply:HasWeapon("ttt_perk_juggernog") then return end
+            ply:EmitSound("perks/burp.wav")
+            ply:SetHealth(ply:GetMaxHealth() * healthMultCvar:GetFloat())
+            ply:SetNWBool("JuggernogActive", true)
+        end)
     end
 
     hook.Add("TTTCanOrderEquipment", "TTTJuggernog2", function(ply, id)

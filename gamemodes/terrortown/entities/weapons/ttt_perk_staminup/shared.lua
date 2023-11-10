@@ -46,31 +46,34 @@ SWEP.DeploySpeed = 4
 SWEP.UseHands = true
 
 hook.Add("TTTPrepareRound", "TTTStaminupReset", function()
-    for k, v in pairs(player.GetAll()) do
-        v:SetNWBool("StaminUpActive", false)
-        timer.Remove("TTTStaminup" .. v:EntIndex())
+    for _, ply in pairs(player.GetAll()) do
+        if ply:GetNWBool("StaminUpActive", false) then
+            ply:SetRunSpeed(ply:GetWalkSpeed())
+            ply:SetNWBool("StaminUpActive", false)
+            timer.Remove("TTTStaminup" .. ply:EntIndex())
+        end
     end
 end)
 
-hook.Add("DoPlayerDeath", "TTTStaminupReset", function(ply)
-    local equip_id = TTT2 and "item_ttt_staminup" or EQUIP_STAMINUP
-
-    if ply:HasEquipmentItem(equip_id) then
+hook.Add("PostPlayerDeath", "TTTStaminupReset", function(ply)
+    if ply:GetNWBool("StaminUpActive", false) then
+        ply:SetRunSpeed(ply:GetWalkSpeed())
         ply:SetNWBool("StaminUpActive", false)
     end
 end)
 
 function SWEP:OnRemove()
-    if CLIENT and IsValid(self:GetOwner()) and self:GetOwner() == LocalPlayer() and self:GetOwner():Alive() then
+    if SERVER then return end
+    local client = LocalPlayer()
+
+    if IsValid(self:GetOwner()) and self:GetOwner() == client and self:GetOwner():Alive() then
         RunConsoleCommand("lastinv")
     end
 
-    if CLIENT then
-        if self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
-            local vm = LocalPlayer():GetViewModel()
-            vm:SetMaterial(oldmat)
-            oldmat = nil
-        end
+    if self:GetOwner() == client and client.GetViewModel then
+        local vm = client:GetViewModel()
+        vm:SetMaterial(PERK_BOTTLE_OLD_MATERIAL)
+        PERK_BOTTLE_OLD_MATERIAL = nil
     end
 end
 
@@ -97,8 +100,10 @@ if CLIENT then
     end)
 
     net.Receive("StaminUpBlurHUD", function()
+        local client = LocalPlayer()
+
         hook.Add("HUDPaint", "StaminUpBlurHUD", function()
-            if IsValid(LocalPlayer()) and IsValid(LocalPlayer():GetActiveWeapon()) and LocalPlayer():GetActiveWeapon():GetClass() == "ttt_perk_staminup" then
+            if IsValid(client) and IsValid(client:GetActiveWeapon()) and client:GetActiveWeapon():GetClass() == "ttt_perk_staminup" then
                 DrawMotionBlur(0.4, 0.8, 0.01)
             end
         end)
@@ -109,19 +114,15 @@ if CLIENT then
     end)
 end
 
-hook.Add("TTTPlayerSpeedModifier", "StaminUpSpeed", function(ply)
-    local equip_id = TTT2 and "item_ttt_staminup" or EQUIP_STAMINUP
-    if ply:HasEquipmentItem(equip_id) and ply:GetNWBool("StaminUpActive", false) then return 1.5 end
-end)
+local speedMultCvar = GetConVar("ttt_staminup_speed_multiplier")
 
 local function SWEPRemoved(wep, owner)
     if IsValid(wep) then
         return false
     else
         if GetRoundState() == ROUND_ACTIVE then
-            owner:SetRunSpeed(400)
+            owner:SetRunSpeed(owner:GetRunSpeed() * speedMultCvar:GetFloat())
             owner:SetNWBool("StaminUpActive", true)
-            owner:SetNWBool("StaminUpFix", true)
         end
 
         return true
@@ -172,9 +173,8 @@ function SWEP:Initialize()
                                         if IsValid(owner) and owner:IsTerror() then
                                             if SWEPRemoved(self, owner) then return end
                                             self:EmitSound("perks/burp.wav")
-                                            owner:SetRunSpeed(400)
+                                            owner:SetRunSpeed(owner:GetRunSpeed() * speedMultCvar:GetFloat())
                                             owner:SetNWBool("StaminUpActive", true)
-                                            owner:SetNWBool("StaminUpFix", true)
                                             self:Remove()
                                         end
                                     end)
@@ -184,27 +184,17 @@ function SWEP:Initialize()
                     end)
                 end
             end)
-
-            hook.Add("PlayerSpawn", "StaminupResetFix", function(ply, transition)
-                if ply:GetNWBool("StaminUpFix") then
-                    ply:SetRunSpeed(ply:GetWalkSpeed())
-                    ply:SetNWBool("StaminUpFix", false)
-                end
-            end)
-
-            hook.Add("PostPlayerDeath", "StaminupResetFix", function(ply)
-                if ply:GetNWBool("StaminUpFix") then
-                    ply:SetRunSpeed(ply:GetWalkSpeed())
-                    ply:SetNWBool("StaminUpFix", false)
-                end
-            end)
         end
 
-        if CLIENT and owner == LocalPlayer() and LocalPlayer().GetViewModel then
-            local vm = LocalPlayer():GetViewModel()
-            local mat = "models/perk_bottle/c_perk_bottle_stamin"
-            oldmat = vm:GetMaterial() or ""
-            vm:SetMaterial(mat)
+        if CLIENT then
+            local client = LocalPlayer()
+
+            if owner == client and client.GetViewModel then
+                local vm = client:GetViewModel()
+                local mat = "models/perk_bottle/c_perk_bottle_stamin"
+                PERK_BOTTLE_OLD_MATERIAL = vm:GetMaterial() or ""
+                vm:SetMaterial(mat)
+            end
         end
     end)
 
@@ -212,10 +202,11 @@ function SWEP:Initialize()
 end
 
 function SWEP:GetViewModelPosition(pos, ang)
-    local newpos = LocalPlayer():EyePos()
-    local newang = LocalPlayer():EyeAngles()
+    local client = LocalPlayer()
+    local newpos = client:EyePos()
+    local newang = client:EyeAngles()
     local up = newang:Up()
-    newpos = newpos + LocalPlayer():GetAimVector() * 3 - up * 65
+    newpos = newpos + client:GetAimVector() * 3 - up * 65
 
     return newpos, newang
 end

@@ -44,6 +44,7 @@ SWEP.DrawCrosshair = false
 SWEP.ViewModelFlip = false
 SWEP.DeploySpeed = 4
 SWEP.UseHands = true
+local explosionRadiusCvar = GetConVar("ttt_phd_explosion_radius")
 
 local function PHDRemoveFallDamage(target, dmginfo)
     if not target:IsPlayer() then return end
@@ -51,13 +52,13 @@ local function PHDRemoveFallDamage(target, dmginfo)
     local equip_id = TTT2 and "item_ttt_phd" or EQUIP_PHD
     if not target:HasEquipmentItem(equip_id) then return end
 
-    if dmginfo:IsFallDamage() and target:GetNWBool("StigDisablePHD") == false then
+    if dmginfo:IsFallDamage() then
         local explode = ents.Create("env_explosion")
         explode:SetPos(target:GetPos())
         explode:SetOwner(target)
         explode:Spawn()
         explode:SetKeyValue("iMagnitude", "100")
-        explode:SetKeyValue("iRadiusOverride", "256")
+        explode:SetKeyValue("iRadiusOverride", tostring(explosionRadiusCvar:GetInt()))
         explode:Fire("Explode", 0, 0)
         explode:EmitSound("weapon_AWP.Single", 400, 400)
 
@@ -85,16 +86,17 @@ hook.Add("DoPlayerDeath", "TTTPHDReset", function(pl)
 end)
 
 function SWEP:OnRemove()
-    if CLIENT and IsValid(self:GetOwner()) and self:GetOwner() == LocalPlayer() and self:GetOwner():Alive() then
+    if SERVER then return end
+    local client = LocalPlayer()
+
+    if IsValid(self:GetOwner()) and self:GetOwner() == client and self:GetOwner():Alive() then
         RunConsoleCommand("lastinv")
     end
 
-    if CLIENT then
-        if self:GetOwner() == LocalPlayer() and LocalPlayer().GetViewModel then
-            local vm = LocalPlayer():GetViewModel()
-            vm:SetMaterial(oldmat)
-            oldmat = nil
-        end
+    if self:GetOwner() == client and client.GetViewModel then
+        local vm = client:GetViewModel()
+        vm:SetMaterial(PERK_BOTTLE_OLD_MATERIAL)
+        PERK_BOTTLE_OLD_MATERIAL = nil
     end
 end
 
@@ -115,8 +117,10 @@ if CLIENT then
     end)
 
     net.Receive("PHDBlurHUD", function()
+        local client = LocalPlayer()
+
         hook.Add("HUDPaint", "PHDBlurPaint", function()
-            if IsValid(LocalPlayer()) and IsValid(LocalPlayer():GetActiveWeapon()) and LocalPlayer():GetActiveWeapon():GetClass() == "ttt_perk_phd" then
+            if IsValid(client) and IsValid(client:GetActiveWeapon()) and client:GetActiveWeapon():GetClass() == "ttt_perk_phd" then
                 DrawMotionBlur(0.4, 0.8, 0.01)
             end
         end)
@@ -196,11 +200,15 @@ function SWEP:Initialize()
             end)
         end
 
-        if CLIENT and owner == LocalPlayer() and LocalPlayer().GetViewModel then
-            local vm = LocalPlayer():GetViewModel()
-            local mat = "models/perk_bottle/c_perk_bottle_phd"
-            oldmat = vm:GetMaterial() or ""
-            vm:SetMaterial(mat)
+        if CLIENT then
+            local client = LocalPlayer()
+
+            if owner == client and client.GetViewModel then
+                local vm = client:GetViewModel()
+                local mat = "models/perk_bottle/c_perk_bottle_phd"
+                PERK_BOTTLE_OLD_MATERIAL = vm:GetMaterial() or ""
+                vm:SetMaterial(mat)
+            end
         end
     end)
 
@@ -208,10 +216,11 @@ function SWEP:Initialize()
 end
 
 function SWEP:GetViewModelPosition(pos, ang)
-    local newpos = LocalPlayer():EyePos()
-    local newang = LocalPlayer():EyeAngles()
+    local client = LocalPlayer()
+    local newpos = client:EyePos()
+    local newang = client:EyeAngles()
     local up = newang:Up()
-    newpos = newpos + LocalPlayer():GetAimVector() * 3 - up * 65
+    newpos = newpos + client:GetAimVector() * 3 - up * 65
 
     return newpos, newang
 end
