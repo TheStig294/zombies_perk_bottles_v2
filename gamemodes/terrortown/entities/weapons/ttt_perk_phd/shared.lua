@@ -45,6 +45,7 @@ SWEP.ViewModelFlip = false
 SWEP.DeploySpeed = 4
 SWEP.UseHands = true
 local explosionRadiusCvar = GetConVar("ttt_phd_explosion_radius")
+local ownExplosionCvar = GetConVar("ttt_phd_only_immune_to_own_explosion")
 
 local function PHDRemoveFallDamage(target, dmginfo)
     if not target:IsPlayer() then return end
@@ -54,6 +55,7 @@ local function PHDRemoveFallDamage(target, dmginfo)
 
     if dmginfo:IsFallDamage() then
         local explode = ents.Create("env_explosion")
+        explode.PHDFlopperExplosionOwner = target
         explode:SetPos(target:GetPos())
         explode:SetOwner(target)
         explode:Spawn()
@@ -64,7 +66,12 @@ local function PHDRemoveFallDamage(target, dmginfo)
 
         return true
     elseif dmginfo:IsExplosionDamage() then
-        return true
+        if not ownExplosionCvar:GetBool() then
+            return true
+        else
+            local inflictor = dmginfo:GetInflictor()
+            if IsValid(inflictor) and IsValid(inflictor.PHDFlopperExplosionOwner) and inflictor.PHDFlopperExplosionOwner == target then return true end
+        end
     end
 end
 

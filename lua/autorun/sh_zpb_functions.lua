@@ -74,6 +74,8 @@ CreateConVar("ttt_phd_traitor", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATE
 
 CreateConVar("ttt_phd_explosion_radius", 256, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Explosion radius of PHD Flopper", 0, 1000)
 
+CreateConVar("ttt_phd_only_immune_to_own_explosion", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Only make a PHD Flopper user immune to their PHD Flopper explosions, instead of any explosion", 0, 1)
+
 -- Speed Cola
 CreateConVar("ttt_speedcola_detective", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a detective can buy Speed Cola", 0, 1)
 
