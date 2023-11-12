@@ -84,7 +84,7 @@ if SERVER then
         if tonumber(id) == EQUIP_JUGGERNOG and ply:IsDrinking() then return false end
     end)
 
-    local healthMultCvar = GetConVar("ttt_juggernog_health_multiplier"):GetFloat()
+    local healthMultCvar = GetConVar("ttt_juggernog_health_multiplier")
 
     hook.Add("TTTOrderedEquipment", "TTTJuggernog", function(ply, id, is_item)
         if id == EQUIP_JUGGERNOG then

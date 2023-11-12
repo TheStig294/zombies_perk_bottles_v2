@@ -27,7 +27,7 @@ if GetConVar("ttt_juggernog_detective"):GetBool() then
 end
 
 if SERVER then
-    local healthMultCvar = GetConVar("ttt_juggernog_health_multiplier"):GetFloat()
+    local healthMultCvar = GetConVar("ttt_juggernog_health_multiplier")
 
     function ITEM:Bought(ply)
         ply:Give("ttt_perk_juggernog")
