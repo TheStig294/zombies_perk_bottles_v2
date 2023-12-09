@@ -1,5 +1,6 @@
 -- The vanilla TTT version of the buy menu passive item for doubletap
 -- All it does is give the player the perk bottle SWEP on purchase, which handles all the rest
+if TTT2 then return end
 if SERVER then
     AddCSLuaFile()
     resource.AddFile("materials/vgui/ttt/ic_doubletap.vmt")
