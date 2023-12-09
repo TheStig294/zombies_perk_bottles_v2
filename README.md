@@ -31,7 +31,6 @@ Speed Cola\
 Doubles reload speed\
 *ttt_speedcola_speed_multiplier 2*\
 \
-\
 **Both can buy:**\
 PHD Flopper\
 Immunity to explosions, instead of taking fall damage, you create an explosion around you!\
