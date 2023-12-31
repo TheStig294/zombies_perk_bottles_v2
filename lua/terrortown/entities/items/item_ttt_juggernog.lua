@@ -18,6 +18,10 @@ ITEM.credits = 1
 ITEM.material = "vgui/ttt/ic_juggernog"
 ITEM.CanBuy = {}
 
+if not ConVarExists("ttt_juggernog_traitor") then
+    include("autorun/sh_zpb_convars.lua")
+end
+
 if GetConVar("ttt_juggernog_traitor"):GetBool() then
     table.insert(ITEM.CanBuy, ROLE_TRAITOR)
 end
