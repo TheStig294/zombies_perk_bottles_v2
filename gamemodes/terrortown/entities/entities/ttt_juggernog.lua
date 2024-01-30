@@ -1,6 +1,7 @@
 -- The vanilla TTT version of the buy menu passive item for juggernog
 -- All it does is give the player the perk bottle SWEP on purchase, which handles all the rest
 if TTT2 then return end
+
 if SERVER then
     AddCSLuaFile()
     resource.AddFile("materials/vgui/ttt/ic_juggernog.vmt")
@@ -85,7 +86,7 @@ if SERVER then
         if tonumber(id) == EQUIP_JUGGERNOG and ply:IsDrinking() then return false end
     end)
 
-    local healthMultCvar = GetConVar("ttt_juggernog_health_multiplier")
+    local healthCvar = GetConVar("ttt_juggernog_extra_health")
 
     hook.Add("TTTOrderedEquipment", "TTTJuggernog", function(ply, id, is_item)
         if id == EQUIP_JUGGERNOG then
@@ -94,7 +95,7 @@ if SERVER then
             timer.Simple(0.2, function()
                 if not IsValid(ply) or not ply:Alive() or ply:IsSpec() or ply:HasWeapon("ttt_perk_juggernog") then return end
                 ply:EmitSound("perks/burp.wav")
-                ply:SetHealth(ply:GetMaxHealth() * healthMultCvar:GetFloat())
+                ply:SetHealth(math.max(ply:Health() + healthCvar:GetInt(), ply:GetMaxHealth() + healthCvar:GetInt()))
                 ply:SetNWBool("JuggernogActive", true)
             end)
         end

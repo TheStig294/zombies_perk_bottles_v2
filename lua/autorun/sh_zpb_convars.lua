@@ -11,7 +11,7 @@ CreateConVar("ttt_juggernog_detective", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_R
 
 CreateConVar("ttt_juggernog_traitor", 0, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a traitor can buy Juggernog", 0, 1)
 
-CreateConVar("ttt_juggernog_health_multiplier", 1.5, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Health multiplier Juggernog gives", 0, 5)
+CreateConVar("ttt_juggernog_extra_health", 50, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Extra health Juggernog gives", 0, 5)
 
 -- PHD Flopper
 CreateConVar("ttt_phd_detective", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY, FCVAR_REPLICATED}, "Whether a detective can buy PHD Flopper", 0, 1)

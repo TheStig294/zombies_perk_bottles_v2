@@ -19,8 +19,8 @@ Increases sprint speed by 50%\
 *ttt_staminup_speed_multiplier 1.5*\
 \
 Juggernog\
-Increases health by 50%\
-*ttt_juggernog_health_multiplier 1.5*\
+Increases health by 50\
+*ttt_juggernog_extra_health 50*\
 \
 **Traitors can buy:**\
 Double Tap\

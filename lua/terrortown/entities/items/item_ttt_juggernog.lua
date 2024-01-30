@@ -31,7 +31,7 @@ if GetConVar("ttt_juggernog_detective"):GetBool() then
 end
 
 if SERVER then
-    local healthMultCvar = GetConVar("ttt_juggernog_health_multiplier")
+    local healthCvar = GetConVar("ttt_juggernog_extra_health")
 
     function ITEM:Bought(ply)
         ply:Give("ttt_perk_juggernog")
@@ -39,7 +39,7 @@ if SERVER then
         timer.Simple(0.2, function()
             if not IsValid(ply) or not ply:Alive() or ply:IsSpec() or ply:HasWeapon("ttt_perk_juggernog") then return end
             ply:EmitSound("perks/burp.wav")
-            ply:SetHealth(ply:GetMaxHealth() * healthMultCvar:GetFloat())
+            ply:SetHealth(math.max(ply:Health() + healthCvar:GetInt(), ply:GetMaxHealth() + healthCvar:GetInt()))
             ply:SetNWBool("JuggernogActive", true)
         end)
     end

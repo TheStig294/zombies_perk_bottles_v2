@@ -111,7 +111,7 @@ if CLIENT then
     end)
 end
 
-local healthMultCvar = GetConVar("ttt_juggernog_health_multiplier")
+local healthCvar = GetConVar("ttt_juggernog_extra_health")
 
 local function SWEPRemoved(wep, owner)
     if IsValid(wep) then
@@ -119,7 +119,7 @@ local function SWEPRemoved(wep, owner)
     else
         if GetRoundState() == ROUND_ACTIVE then
             owner:EmitSound("perks/burp.wav")
-            owner:SetHealth(owner:GetMaxHealth() * healthMultCvar:GetFloat())
+            owner:SetHealth(math.max(owner:Health() + healthCvar:GetInt(), owner:GetMaxHealth() + healthCvar:GetInt()))
             owner:SetNWBool("JuggernogActive", true)
         end
 
@@ -144,7 +144,7 @@ function SWEP:Initialize()
 
         if SERVER then
             owner:SelectWeapon(self:GetClass())
-            owner:ChatPrint("JUGGERNOG:\nFull heal and max health increase!")
+            owner:ChatPrint("JUGGERNOG:\nFull heal + extra health!")
             net.Start("DrinkingtheJuggernog")
             net.Send(owner)
 
@@ -171,7 +171,7 @@ function SWEP:Initialize()
                                         if IsValid(owner) and owner:IsTerror() then
                                             if SWEPRemoved(self, owner) then return end
                                             self:EmitSound("perks/burp.wav")
-                                            owner:SetHealth(owner:GetMaxHealth() * healthMultCvar:GetFloat())
+                                            owner:SetHealth(math.max(owner:Health() + healthCvar:GetInt(), owner:GetMaxHealth() + healthCvar:GetInt()))
                                             owner:SetNWBool("JuggernogActive", true)
                                             self:Remove()
                                         end
