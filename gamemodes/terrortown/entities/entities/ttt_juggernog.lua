@@ -104,7 +104,11 @@ end
 
 if CLIENT then
     hook.Add("TTTBodySearchEquipment", "JuggernogCorpseIcon", function(search, eq)
-        search.eq_juggernog = util.BitSet(eq, EQUIP_JUGGERNOG)
+        if type(eq) == "table" then
+            search.eq_juggernog = table.HasValue(eq, EQUIP_JUGGERNOG)
+        else
+            search.eq_juggernog = util.BitSet(eq, EQUIP_JUGGERNOG)
+        end
     end)
 
     hook.Add("TTTBodySearchPopulate", "JuggernogCorpseIcon", function(search, raw)
