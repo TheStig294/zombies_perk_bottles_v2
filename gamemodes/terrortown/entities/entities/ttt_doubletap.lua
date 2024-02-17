@@ -100,7 +100,11 @@ end
 
 if CLIENT then
     hook.Add("TTTBodySearchEquipment", "DoubleTapCorpseIcon", function(search, eq)
-        search.eq_doubletap = util.BitSet(eq, EQUIP_DOUBLETAP)
+        if type(eq) == "table" then
+            search.eq_doubletap = table.HasValue(eq, EQUIP_DOUBLETAP)
+        else
+            search.eq_doubletap = util.BitSet(eq, EQUIP_DOUBLETAP)
+        end
     end)
 
     hook.Add("TTTBodySearchPopulate", "DoubleTapCorpseIcon", function(search, raw)
