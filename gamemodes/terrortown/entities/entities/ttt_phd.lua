@@ -100,7 +100,11 @@ end
 
 if CLIENT then
     hook.Add("TTTBodySearchEquipment", "PHDCorpseIcon", function(search, eq)
-        search.eq_phd = util.BitSet(eq, EQUIP_PHD)
+        if type(eq) == "table" then
+            search.eq_phd = table.HasValue(eq, EQUIP_PHD)
+        else
+            search.eq_phd = util.BitSet(eq, EQUIP_PHD)
+        end
     end)
 
     hook.Add("TTTBodySearchPopulate", "PHDCorpseIcon", function(search, raw)

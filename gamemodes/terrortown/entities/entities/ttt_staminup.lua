@@ -103,7 +103,11 @@ end
 
 if CLIENT then
     hook.Add("TTTBodySearchEquipment", "StaminupCorpseIcon", function(search, eq)
-        search.eq_staminup = util.BitSet(eq, EQUIP_STAMINUP)
+        if type(eq) == "table" then
+            search.eq_staminup = table.HasValue(eq, EQUIP_STAMINUP)
+        else
+            search.eq_staminup = util.BitSet(eq, EQUIP_STAMINUP)
+        end
     end)
 
     hook.Add("TTTBodySearchPopulate", "StaminupCorpseIcon", function(search, raw)

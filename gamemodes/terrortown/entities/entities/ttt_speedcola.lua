@@ -100,7 +100,11 @@ end
 
 if CLIENT then
     hook.Add("TTTBodySearchEquipment", "SpeedColaCorpseIcon", function(search, eq)
-        search.eq_speedcola = util.BitSet(eq, EQUIP_SPEEDCOLA)
+        if type(eq) == "table" then
+            search.eq_speedcola = table.HasValue(eq, EQUIP_SPEEDCOLA)
+        else
+            search.eq_speedcola = util.BitSet(eq, EQUIP_SPEEDCOLA)
+        end
     end)
 
     hook.Add("TTTBodySearchPopulate", "SpeedColaCorpseIcon", function(search, raw)
