@@ -34,7 +34,11 @@ if CLIENT then
                 amount = amount + 1
             end
 
-            i = i * 2
+            if CRVersion and CRVersion("2.1.2") then
+                i = i + 1
+            else
+                i = i * 2
+            end
         end
 
         return defaultY - 80 * amount
