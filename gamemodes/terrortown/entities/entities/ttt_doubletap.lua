@@ -12,25 +12,25 @@ if CLIENT then
     -- feel for to use this function for your own perk, but please credit Zaratusa
     -- your perk needs a "hud = true" in the table, to work properly
     local defaultY = ScrH() / 2 + 20
+    local client
 
     local function getYCoordinate(currentPerkID)
         local amount, i, perk = 0, 1
+        client = client or LocalPlayer()
 
         while i < currentPerkID do
-            local role = LocalPlayer():GetRole()
+            local role = client:GetRole()
+            perk = GetEquipmentItem(role, i)
 
-            --he gets it in a special way
-            if role == ROLE_INNOCENT then
-                if GetEquipmentItem(ROLE_TRAITOR, i) then
-                    role = ROLE_TRAITOR -- Temp fix what if a perk is just for Detective
-                elseif GetEquipmentItem(ROLE_DETECTIVE, i) then
-                    role = ROLE_DETECTIVE
+            if not perk then
+                perk = GetEquipmentItem(ROLE_TRAITOR, i)
+
+                if not perk then
+                    perk = GetEquipmentItem(ROLE_DETECTIVE, i)
                 end
             end
 
-            perk = GetEquipmentItem(role, i)
-
-            if istable(perk) and perk.hud and LocalPlayer():HasEquipmentItem(perk.id) then
+            if istable(perk) and perk.hud and client:HasEquipmentItem(perk.id) then
                 amount = amount + 1
             end
 
