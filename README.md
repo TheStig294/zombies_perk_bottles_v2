@@ -13,25 +13,25 @@ Each bottle now explains its effect in chat when you drink it, and there are now
 
 ## Perk effects and convars
 
-**Detectives can buy:**\
+### Detectives can buy
 Stamin-up\
 Increases sprint speed by 50%\
 *ttt_staminup_speed_multiplier 1.5*\
 \
 Juggernog\
 Increases health by 50\
-*ttt_juggernog_extra_health 50*\
-\
-**Traitors can buy:**\
+*ttt_juggernog_extra_health 50*
+
+### Traitors can buy
 Double Tap\
 Increases fire rate by 50%\
 *ttt_doubletap_firerate_multiplier 1.5*\
 \
 Speed Cola\
 Doubles reload speed\
-*ttt_speedcola_speed_multiplier 2*\
-\
-**Both can buy:**\
+*ttt_speedcola_speed_multiplier 2*
+
+### Both can buy
 PHD Flopper\
 Immunity to explosions, instead of taking fall damage, you create an explosion around you!\
 *ttt_phd_explosion_radius 256*\
